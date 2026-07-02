@@ -1,0 +1,182 @@
+.
+├── build
+│   ├── lib.linux-x86_64-cpython-314
+│   │   └── engine
+│   │       └── cython
+│   │           └── window
+│   │               └── engine_window.cpython-314-x86_64-linux-gnu.so
+│   └── temp.linux-x86_64-cpython-314
+│       └── engine
+│           ├── core
+│           │   └── window
+│           │       └── engine_window.o
+│           └── cython
+│               └── window
+│                   └── engine_window.o
+├── engine
+│   ├── core
+│   │   ├── base
+│   │   │   ├── config.cpp
+│   │   │   ├── config.hpp
+│   │   │   ├── engine.cpp
+│   │   │   ├── engine.hpp
+│   │   │   ├── log.cpp
+│   │   │   ├── log.hpp
+│   │   │   ├── system.cpp
+│   │   │   ├── system.hpp
+│   │   │   ├── time.cpp
+│   │   │   └── time.hpp
+│   │   ├── inputs
+│   │   │   ├── input.cpp
+│   │   │   └── input.hpp
+│   │   ├── renderer
+│   │   │   ├── renderer.cpp
+│   │   │   └── renderer.hpp
+│   │   └── window
+│   │       ├── engine_window.cpp
+│   │       └── engine_window.hpp
+│   ├── cython
+│   │   ├── base
+│   │   │   ├── config.pxd
+│   │   │   ├── config.pyx
+│   │   │   ├── engine.pxd
+│   │   │   ├── engine.pyx
+│   │   │   ├── log.pxd
+│   │   │   ├── log.pyx
+│   │   │   ├── system.pxd
+│   │   │   ├── system.pyx
+│   │   │   ├── time.pxd
+│   │   │   └── time.pyx
+│   │   ├── __init__.py
+│   │   ├── input
+│   │   │   ├── input.pxd
+│   │   │   └── input.pyx
+│   │   ├── __pycache__
+│   │   │   └── __init__.cpython-314.pyc
+│   │   ├── renderer
+│   │   │   ├── rendere.pxd.
+├── build
+│   ├── lib.linux-x86_64-cpython-314
+│   │   └── engine
+│   │       └── cython
+│   │           └── window
+│   │               └── engine_window.cpython-314-x86_64-linux-gnu.so
+│   └── temp.linux-x86_64-cpython-314
+│       └── engine
+│           ├── core
+│           │   └── window
+│           │       └── engine_window.o
+│           └── cython
+│               └── window
+│                   └── engine_window.o
+├── engine
+│   ├── core
+│   │   ├── base
+│   │   │   ├── config.cpp
+│   │   │   ├── config.hpp
+│   │   │   ├── engine.cpp
+│   │   │   ├── engine.hpp
+│   │   │   ├── log.cpp
+│   │   │   ├── log.hpp
+│   │   │   ├── time.cpp
+│   │   │   └── time.hpp
+│   │   ├── inputs
+│   │   │   ├── input.cpp
+│   │   │   └── input.hpp
+│   │   ├── renderer
+│   │   │   ├── renderer.cpp
+│   │   │   └── renderer.hpp
+│   │   └── window
+│   │       ├── engine_window.cpp
+│   │       └── engine_window.hpp
+│   ├── cython
+│   │   ├── base
+│   │   │   ├── config.pxd
+│   │   │   ├── config.pyx
+│   │   │   ├── engine.pxd
+│   │   │   ├── engine.pyx
+│   │   │   ├── log.pxd
+│   │   │   ├── log.pyx
+│   │   │   ├── system.pxd
+│   │   │   ├── system.pyx
+│   │   │   ├── time.pxd
+│   │   │   └── time.pyx
+│   │   ├── __init__.py
+│   │   ├── input
+│   │   │   ├── input.pxd
+│   │   │   └── input.pyx
+│   │   ├── __pycache__
+│   │   │   └── __init__.cpython-314.pyc
+│   │   ├── renderer
+│   │   │   ├── rendere.pxd
+│   │   │   └── renderer.pyx
+│   │   └── window
+│   │       ├── engine_window.cpp
+│   │       ├── engine_window.cpython-314-x86_64-linux-gnu.so
+│   │       ├── engine_window.pxd
+│   │       ├── engine_window.pyx
+│   │       ├── __init__.py
+│   │       └── __pycache__
+│   │           └── __init__.cpython-314.pyc
+│   └── python
+│       ├── engine
+│       │   ├── config.py
+│       │   ├── engine.py
+│       │   ├── log.py
+│       │   ├── system.py
+│       │   └── time.py
+│       ├── __init__.py
+│       ├── input
+│       │   └── input.py
+│       ├── renderer
+│       │   └── renderer.py
+│       └── window
+│           ├── engine_window.py
+│           └── __init__.py
+├── project_tree.txt
+├── R2D2_tree.txt
+├── setup.py
+├── shaders
+│   ├── gpu_stress.frag
+│   ├── gpu_stress.vert
+│   ├── quad.frag
+│   └── quad.vert
+└── tree.txt
+
+31 directories, 57 files
+
+│   │   │   └── renderer.pyx
+│   │   └── window
+│   │       ├── engine_window.cpp
+│   │       ├── engine_window.cpython-314-x86_64-linux-gnu.so
+│   │       ├── engine_window.pxd
+│   │       ├── engine_window.pyx
+│   │       ├── __init__.py
+│   │       └── __pycache__
+│   │           └── __init__.cpython-314.pyc
+│   └── python
+│       ├── engine
+│       │   ├── config.py
+│       │   ├── engine.py
+│       │   ├── log.py
+│       │   ├── system.py
+│       │   └── time.py
+│       ├── __init__.py
+│       ├── input
+│       │   └── input.py
+│       ├── renderer
+│       │   └── renderer.py
+│       └── window
+│           ├── engine_window.py
+│           └── __init__.py
+├── project_tree.txt
+├── R2D2_tree.txt
+├── setup.py
+├── shaders
+│   ├── gpu_stress.frag
+│   ├── gpu_stress.vert
+│   ├── quad.frag
+│   └── quad.vert
+└── tree.txt
+
+31 directories, 59 files
