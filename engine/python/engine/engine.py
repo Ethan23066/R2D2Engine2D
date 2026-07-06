@@ -1,10 +1,10 @@
 # engine/python/engine/engine.py
 
-from engine.cython.base.engine import Engine as CyEngine
+from engine.cython.base.engine import PyEngine
 
 class Engine:
     def __init__(self):
-        self._engine = CyEngine()
+        self._engine = PyEngine()
 
     def init(self):
         self._engine.init()

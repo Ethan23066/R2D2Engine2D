@@ -1,5 +1,4 @@
 // engine/core/base/engine.cpp
-
 #include "engine.hpp"
 
 namespace r2d2 {
@@ -20,8 +19,7 @@ namespace r2d2 {
 
     void Engine::tick() {
         if (!running) return;
-
-        // future: events, lifecycle, renderer, etc.
+        // future: events, lifecycle, renderer, input...
     }
 
     bool Engine::is_running() const {

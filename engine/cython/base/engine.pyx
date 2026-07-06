@@ -2,7 +2,7 @@
 
 from engine.cython.base.engine cimport Engine as CppEngine
 
-cdef class Engine:
+cdef class PyEngine:
     cdef CppEngine* cpp
 
     def __cinit__(self):

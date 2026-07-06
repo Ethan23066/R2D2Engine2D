@@ -1,17 +1,14 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
-import os
 
-# --- FLAGS C++ OPTIMISÉS ---
 extra_compile_args = [
     "-O3",
     "-Wall",
-    "-std=c++20",
+    "-std=c++2b",
 ]
 
 extra_link_args = []
 
-# --- FONCTION POUR AUTO-DETECTER LES MODULES ---
 def make_ext(module, pyx_path, cpp_path, include_dir, libs=None):
     return Extension(
         module,
@@ -34,7 +31,7 @@ extensions = [
         libs=["glfw", "GL"]
     ),
 
-    # --- BASE MODULES ---
+    # --- TIME ---
     make_ext(
         "engine.cython.base.time",
         "engine/cython/base/time.pyx",
@@ -42,6 +39,7 @@ extensions = [
         "engine/core/base"
     ),
 
+    # --- LOG ---
     make_ext(
         "engine.cython.base.log",
         "engine/cython/base/log.pyx",
@@ -49,6 +47,7 @@ extensions = [
         "engine/core/base"
     ),
 
+    # --- SYSTEM ---
     make_ext(
         "engine.cython.base.system",
         "engine/cython/base/system.pyx",
@@ -61,14 +60,6 @@ extensions = [
         "engine.cython.base.config",
         "engine/cython/base/config.pyx",
         "engine/core/base/config.cpp",
-        "engine/core/base"
-    ),
-
-    # --- CORE ---
-    make_ext(
-        "engine.cython.base.core",
-        "engine/cython/base/core.pyx",
-        "engine/core/base/core.cpp",
         "engine/core/base"
     ),
 

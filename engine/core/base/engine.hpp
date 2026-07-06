@@ -1,5 +1,4 @@
 // engine/core/base/engine.hpp
-
 #pragma once
 
 namespace r2d2 {
