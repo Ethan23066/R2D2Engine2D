@@ -1,55 +1,71 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
+import os
+
+# --- FLAGS C++ OPTIMISÉS ---
+extra_compile_args = [
+    "-O3",
+    "-Wall",
+    "-std=c++20",
+]
+
+extra_link_args = []
+
+# --- FONCTION POUR AUTO-DETECTER LES MODULES ---
+def make_ext(module, pyx_path, cpp_path, include_dir, libs=None):
+    return Extension(
+        module,
+        sources=[pyx_path, cpp_path],
+        include_dirs=[include_dir],
+        language="c++",
+        libraries=libs or [],
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args,
+    )
 
 extensions = [
 
     # --- WINDOW ---
-    Extension(
+    make_ext(
         "engine.cython.window.engine_window",
-        sources=[
-            "engine/cython/window/engine_window.pyx",
-            "engine/core/window/engine_window.cpp",
-        ],
-        include_dirs=["engine/core/window"],
-        language="c++",
-        libraries=["glfw", "GL"],
+        "engine/cython/window/engine_window.pyx",
+        "engine/core/window/engine_window.cpp",
+        "engine/core/window",
+        libs=["glfw", "GL"]
     ),
 
     # --- TIME ---
-    Extension(
+    make_ext(
         "engine.cython.base.time",
-        sources=[
-            "engine/cython/base/time.pyx",
-            "engine/core/base/time.cpp",
-        ],
-        include_dirs=["engine/core/base"],
-        language="c++",
+        "engine/cython/base/time.pyx",
+        "engine/core/base/time.cpp",
+        "engine/core/base"
     ),
 
     # --- LOG ---
-    Extension(
+    make_ext(
         "engine.cython.base.log",
-        sources=[
-            "engine/cython/base/log.pyx",
-            "engine/core/base/log.cpp",
-        ],
-        include_dirs=["engine/core/base"],
-        language="c++",
+        "engine/cython/base/log.pyx",
+        "engine/core/base/log.cpp",
+        "engine/core/base"
     ),
 
     # --- SYSTEM ---
-    Extension(
+    make_ext(
         "engine.cython.base.system",
-        sources=[
-            "engine/cython/base/system.pyx",
-            "engine/core/base/system.cpp",
-        ],
-        include_dirs=["engine/core/base"],
-        language="c++",
+        "engine/cython/base/system.pyx",
+        "engine/core/base/system.cpp",
+        "engine/core/base"
     ),
 ]
 
 setup(
     name="r2d2engine2d",
-    ext_modules=cythonize(extensions, language_level="3"),
+    python_requires="==3.14.*",
+    ext_modules=cythonize(
+        extensions,
+        language_level="3",
+        annotate=True,
+        force=True,
+    ),
 )
