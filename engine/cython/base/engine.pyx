@@ -21,4 +21,5 @@ cdef class PyEngine:
         self.cpp.tick()
 
     def is_running(self):
-        return self.cpp.is_running()
+        cdef bint state = self.cpp.is_running()
+        return state
