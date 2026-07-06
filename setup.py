@@ -34,7 +34,7 @@ extensions = [
         libs=["glfw", "GL"]
     ),
 
-    # --- TIME ---
+    # --- BASE MODULES ---
     make_ext(
         "engine.cython.base.time",
         "engine/cython/base/time.pyx",
@@ -42,7 +42,6 @@ extensions = [
         "engine/core/base"
     ),
 
-    # --- LOG ---
     make_ext(
         "engine.cython.base.log",
         "engine/cython/base/log.pyx",
@@ -50,12 +49,67 @@ extensions = [
         "engine/core/base"
     ),
 
-    # --- SYSTEM ---
     make_ext(
         "engine.cython.base.system",
         "engine/cython/base/system.pyx",
         "engine/core/base/system.cpp",
         "engine/core/base"
+    ),
+
+    # --- CONFIG ---
+    make_ext(
+        "engine.cython.base.config",
+        "engine/cython/base/config.pyx",
+        "engine/core/base/config.cpp",
+        "engine/core/base"
+    ),
+
+    # --- CORE ---
+    make_ext(
+        "engine.cython.base.core",
+        "engine/cython/base/core.pyx",
+        "engine/core/base/core.cpp",
+        "engine/core/base"
+    ),
+
+    # --- ENGINE ---
+    make_ext(
+        "engine.cython.base.engine",
+        "engine/cython/base/engine.pyx",
+        "engine/core/base/engine.cpp",
+        "engine/core/base"
+    ),
+
+    # --- EVENTS ---
+    make_ext(
+        "engine.cython.base.events",
+        "engine/cython/base/events.pyx",
+        "engine/core/base/events.cpp",
+        "engine/core/base"
+    ),
+
+    # --- LIFECYCLE ---
+    make_ext(
+        "engine.cython.base.lifecycle",
+        "engine/cython/base/lifecycle.pyx",
+        "engine/core/base/lifecycle.cpp",
+        "engine/core/base"
+    ),
+
+    # --- INPUT ---
+    make_ext(
+        "engine.cython.input.input",
+        "engine/cython/input/input.pyx",
+        "engine/core/inputs/input.cpp",
+        "engine/core/inputs"
+    ),
+
+    # --- RENDERER ---
+    make_ext(
+        "engine.cython.renderer.renderer",
+        "engine/cython/renderer/renderer.pyx",
+        "engine/core/renderer/renderer.cpp",
+        "engine/core/renderer"
     ),
 ]
 
