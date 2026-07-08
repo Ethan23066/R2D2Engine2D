@@ -1,5 +1,5 @@
 from libcpp.string cimport string
-from log cimport Log as CLog
+from .log cimport Log as CLog
 
 def info(msg: str):
     CLog.info(string(msg))
