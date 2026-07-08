@@ -2,10 +2,13 @@ from libcpp.string cimport string
 from .log cimport Log as CLog
 
 def info(msg: str):
-    CLog.info(string(msg))
+    cdef string cpp_msg = string(msg.encode('utf-8'))
+    CLog.info(cpp_msg)
 
 def warn(msg: str):
-    CLog.warn(string(msg))
+    cdef string cpp_msg = string(msg.encode('utf-8'))
+    CLog.warn(cpp_msg)
 
 def error(msg: str):
-    CLog.error(string(msg))
+    cdef string cpp_msg = string(msg.encode('utf-8'))
+    CLog.error(cpp_msg)
