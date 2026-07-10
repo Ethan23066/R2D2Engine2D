@@ -18,6 +18,16 @@ def collect_cpp(path):
         if f.endswith(".cpp")
     ]
 
+# --- INCLUDE DIRS GLOBAUX ---
+# IMPORTANT : le "." corrige ton erreur de config.hpp introuvable
+global_include_dirs = [
+    ".",                     # racine du projet → indispensable
+    "engine/core/base",
+    "engine/core/window",
+    "engine/core/inputs",
+    "engine/core/renderer",
+]
+
 extensions = [
 
     # --- WINDOW ---
@@ -27,7 +37,7 @@ extensions = [
             "engine/cython/window/engine_window.pyx",
             *collect_cpp("engine/core/window"),
         ],
-        include_dirs=["engine/core/window"],
+        include_dirs=global_include_dirs,
         language="c++",
         libraries=["glfw", "GL"],
         extra_compile_args=extra_compile_args,
@@ -41,7 +51,7 @@ extensions = [
             "engine/cython/base/time.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["engine/core/base"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -53,7 +63,7 @@ extensions = [
             "engine/cython/base/log.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["engine/core/base"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -65,7 +75,7 @@ extensions = [
             "engine/cython/base/system.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["engine/core/base"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -77,7 +87,7 @@ extensions = [
             "engine/cython/base/config.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["engine/core/base"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -89,7 +99,7 @@ extensions = [
             "engine/cython/base/events.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["engine/core/base"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -101,7 +111,7 @@ extensions = [
             "engine/cython/base/lifecycle.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["engine/core/base"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -114,7 +124,7 @@ extensions = [
             "engine/cython/input/input.pyx",
             *collect_cpp("engine/core/inputs"),
         ],
-        include_dirs=["engine/core/inputs"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -127,7 +137,7 @@ extensions = [
             "engine/cython/renderer/renderer.pyx",
             *collect_cpp("engine/core/renderer"),
         ],
-        include_dirs=["engine/core/renderer"],
+        include_dirs=global_include_dirs,
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
