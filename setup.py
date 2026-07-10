@@ -22,98 +22,86 @@ extensions = [
 
     # --- WINDOW ---
     Extension(
-        "base.cython.window.engine_window",
+        "engine.cython.window.engine_window",
         sources=[
-            "base/cython/window/engine_window.pyx",
+            "engine/cython/window/engine_window.pyx",
             *collect_cpp("engine/core/window"),
         ],
-        include_dirs=["base/core/window"],
+        include_dirs=["engine/core/window"],
         language="c++",
         libraries=["glfw", "GL"],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
-    # --- BASE MODULES (time, log, system, config, base, events, lifecycle) ---
+    # --- BASE MODULES ---
     Extension(
-        "base.cython.base.time",
+        "engine.cython.base.time",
         sources=[
-            "base/cython/base/time.pyx",
+            "engine/cython/base/time.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["base/core/base"],
+        include_dirs=["engine/core/base"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
     Extension(
-        "base.cython.base.log",
+        "engine.cython.base.log",
         sources=[
-            "base/cython/base/log.pyx",
+            "engine/cython/base/log.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["base/core/base"],
+        include_dirs=["engine/core/base"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
     Extension(
-        "base.cython.base.system",
+        "engine.cython.base.system",
         sources=[
-            "base/cython/base/system.pyx",
-            *collect_cpp("engine/core/base"),  # ← LOG.CPP INCLUS AUTOMATIQUEMENT
+            "engine/cython/base/system.pyx",
+            *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["base/core/base"],
+        include_dirs=["engine/core/base"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
     Extension(
-        "base.cython.base.config",
+        "engine.cython.base.config",
         sources=[
-            "base/cython/base/config.pyx",
+            "engine/cython/base/config.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["base/core/base"],
+        include_dirs=["engine/core/base"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
     Extension(
-        "base.cython.base.base",
+        "engine.cython.base.events",
         sources=[
-            "base/cython/base/base.pyx",
+            "engine/cython/base/events.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["base/core/base"],
+        include_dirs=["engine/core/base"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
     Extension(
-        "base.cython.base.events",
+        "engine.cython.base.lifecycle",
         sources=[
-            "base/cython/base/events.pyx",
+            "engine/cython/base/lifecycle.pyx",
             *collect_cpp("engine/core/base"),
         ],
-        include_dirs=["base/core/base"],
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
-
-    Extension(
-        "base.cython.base.lifecycle",
-        sources=[
-            "base/cython/base/lifecycle.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=["base/core/base"],
+        include_dirs=["engine/core/base"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -121,12 +109,12 @@ extensions = [
 
     # --- INPUT ---
     Extension(
-        "base.cython.input.input",
+        "engine.cython.input.input",
         sources=[
-            "base/cython/input/input.pyx",
+            "engine/cython/input/input.pyx",
             *collect_cpp("engine/core/inputs"),
         ],
-        include_dirs=["base/core/inputs"],
+        include_dirs=["engine/core/inputs"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
@@ -134,12 +122,12 @@ extensions = [
 
     # --- RENDERER ---
     Extension(
-        "base.cython.renderer.renderer",
+        "engine.cython.renderer.renderer",
         sources=[
-            "base/cython/renderer/renderer.pyx",
+            "engine/cython/renderer/renderer.pyx",
             *collect_cpp("engine/core/renderer"),
         ],
-        include_dirs=["base/core/renderer"],
+        include_dirs=["engine/core/renderer"],
         language="c++",
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
