@@ -23,5 +23,4 @@ cdef class PyLifecycle:
         self.lc.shutdown()
 
     def is_running(self):
-        # conversion manuelle, évite le wrapper Python cassé
-        return True if self.lc.is_running() else False
+        return bool(self.lc.is_running())

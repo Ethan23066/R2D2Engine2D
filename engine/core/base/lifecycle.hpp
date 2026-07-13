@@ -19,7 +19,7 @@ public:
     void init();
     void update();
     void shutdown();
-    bool is_running() const;
+    uint8_t is_running() const;
 
 private:
     std::atomic<bool> running_;

@@ -18,8 +18,9 @@ void Lifecycle::shutdown() {
     running_.store(false);
 }
 
-bool Lifecycle::is_running() const {
-    return running_.load();
+uint8_t Lifecycle::is_running() const {
+    return running_ ? 1 : 0;
 }
+
 
 } // namespace r2d2
