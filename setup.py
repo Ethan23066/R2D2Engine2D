@@ -11,21 +11,20 @@ extra_compile_args = [
 extra_link_args = []
 
 def collect_cpp(path):
-    """Collect all .cpp files in a directory."""
     return [
         os.path.join(path, f)
         for f in os.listdir(path)
         if f.endswith(".cpp")
     ]
 
-# --- INCLUDE DIRS GLOBAUX ---
-# IMPORTANT : le "." corrige ton erreur de config.hpp introuvable
+# --- INCLUDE DIRS ---
 global_include_dirs = [
-    ".",                     # racine du projet → indispensable
+    ".",  # racine du projet
     "engine/core/base",
     "engine/core/window",
     "engine/core/inputs",
     "engine/core/renderer",
+    "engine/core/backend/gl3",
 ]
 
 extensions = [
@@ -130,12 +129,38 @@ extensions = [
         extra_link_args=extra_link_args,
     ),
 
-    # --- RENDERER ---
+    # --- RENDERER (si tu le gardes) ---
     Extension(
         "engine.cython.renderer.renderer",
         sources=[
             "engine/cython/renderer/renderer.pyx",
             *collect_cpp("engine/core/renderer"),
+        ],
+        include_dirs=global_include_dirs,
+        language="c++",
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args,
+    ),
+
+    # --- BACKEND GL3 ---
+    Extension(
+        "engine.cython.backend.gl3.gl3",
+        sources=[
+            "engine/cython/backend/gl3/gl3.pyx",
+            "engine/core/backend/gl3/RendererGL3.cpp",
+        ],
+        include_dirs=global_include_dirs,
+        language="c++",
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args,
+    ),
+
+    # --- MANAGER ---
+    Extension(
+        "engine.cython.backend.manager",
+        sources=[
+            "engine/cython/backend/manager.pyx",
+            *collect_cpp("engine/core/base"),
         ],
         include_dirs=global_include_dirs,
         language="c++",
