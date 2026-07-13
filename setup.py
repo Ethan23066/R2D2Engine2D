@@ -2,6 +2,7 @@ from setuptools import setup, Extension
 from Cython.Build import cythonize
 import os
 
+# --- COMPILATION FLAGS ---
 extra_compile_args = [
     "-O3",
     "-Wall",
@@ -10,6 +11,7 @@ extra_compile_args = [
 
 extra_link_args = []
 
+# --- COLLECTEUR DE FICHIERS C++ ---
 def collect_cpp(path):
     return [
         os.path.join(path, f)
@@ -27,6 +29,7 @@ global_include_dirs = [
     "engine/core/backend/gl3",
 ]
 
+# --- EXTENSIONS CYTHON ---
 extensions = [
 
     # --- WINDOW ---
@@ -38,83 +41,25 @@ extensions = [
         ],
         include_dirs=global_include_dirs,
         language="c++",
-        libraries=["glfw", "GL"],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     ),
 
     # --- BASE MODULES ---
-    Extension(
-        "engine.cython.base.time",
-        sources=[
-            "engine/cython/base/time.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=global_include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
-
-    Extension(
-        "engine.cython.base.log",
-        sources=[
-            "engine/cython/base/log.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=global_include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
-
-    Extension(
-        "engine.cython.base.system",
-        sources=[
-            "engine/cython/base/system.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=global_include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
-
-    Extension(
-        "engine.cython.base.config",
-        sources=[
-            "engine/cython/base/config.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=global_include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
-
-    Extension(
-        "engine.cython.base.events",
-        sources=[
-            "engine/cython/base/events.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=global_include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
-
-    Extension(
-        "engine.cython.base.lifecycle",
-        sources=[
-            "engine/cython/base/lifecycle.pyx",
-            *collect_cpp("engine/core/base"),
-        ],
-        include_dirs=global_include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
-        extra_link_args=extra_link_args,
-    ),
+    *[
+        Extension(
+            f"engine.cython.base.{name}",
+            sources=[
+                f"engine/cython/base/{name}.pyx",
+                *collect_cpp("engine/core/base"),
+            ],
+            include_dirs=global_include_dirs,
+            language="c++",
+            extra_compile_args=extra_compile_args,
+            extra_link_args=extra_link_args,
+        )
+        for name in ["time", "log", "system", "config", "events", "lifecycle"]
+    ],
 
     # --- INPUT ---
     Extension(
@@ -129,7 +74,7 @@ extensions = [
         extra_link_args=extra_link_args,
     ),
 
-    # --- RENDERER (si tu le gardes) ---
+    # --- RENDERER ---
     Extension(
         "engine.cython.renderer.renderer",
         sources=[
@@ -142,12 +87,12 @@ extensions = [
         extra_link_args=extra_link_args,
     ),
 
-    # --- BACKEND GL3 ---
+    # --- BACKEND GL3 (VERSION PROPRE) ---
     Extension(
         "engine.cython.backend.gl3.gl3",
         sources=[
             "engine/cython/backend/gl3/gl3.pyx",
-            "engine/core/backend/gl3/RendererGL3.cpp",
+            *collect_cpp("engine/core/backend/gl3"),
         ],
         include_dirs=global_include_dirs,
         language="c++",
@@ -169,6 +114,7 @@ extensions = [
     ),
 ]
 
+# --- SETUP ---
 setup(
     name="r2d2engine2d",
     python_requires="==3.14.*",

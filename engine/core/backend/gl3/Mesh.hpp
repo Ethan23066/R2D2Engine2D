@@ -1,5 +1,5 @@
 #pragma once
-#include <GL/gl.h>
+#include <GL/glad.h>
 
 class Mesh {
 public:
