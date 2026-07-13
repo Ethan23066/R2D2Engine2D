@@ -1,10 +1,10 @@
 #include "manager.hpp"
 #include "engine/core/backend/gl3/RendererGL3.hpp"
-#include "engine/core/base/log.hpp"
+#include "log.hpp"
 
 RendererManager::RendererManager() {
     backend = new RendererGL3();
-    Log::info("Backend forcé : GL3");
+    r2d2::Log::info("Backend forcé : GL3");
 }
 
 RendererManager::~RendererManager() {

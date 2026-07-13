@@ -7,10 +7,10 @@ cdef class PyRendererGL3:
         self.ptr = new RendererGL3()
 
     def init(self):
-        return self.ptr.init()
+        return bool(self.ptr.init())
 
     def resize(self, int w, int h):
-        self.ptr.resize(self.ptr, w, h)
+        self.ptr.resize(w, h)
 
     def begin_frame(self):
         self.ptr.begin_frame()

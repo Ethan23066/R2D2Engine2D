@@ -1,6 +1,7 @@
 #pragma once
 
-class RendererGL3;
+#include "log.hpp"
+#include "engine/core/backend/gl3/RendererGL3.hpp"
 
 class RendererManager {
 public:
