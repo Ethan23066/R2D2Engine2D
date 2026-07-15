@@ -1,25 +1,30 @@
 #include "RendererGL3.hpp"
-#include <GL/gl.h>
 
-RendererGL3::RendererGL3() {}
+bool RendererGL3::init(GLFWwindow* win, int w, int h) {
+    window = win;
+    width = w;
+    height = h;
 
-bool RendererGL3::init() {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    if (!gladLoadGL()) {
+        return false;
+    }
+
+    glViewport(0, 0, width, height);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
     return true;
 }
 
-void RendererGL3::resize(int w, int h) {
-    glViewport(0, 0, w, h);
-}
-
-void RendererGL3::begin_frame() {
-    glClear(GL_COLOR_BUFFER_BIT);
+void RendererGL3::begin_frame(float r, float g, float b, float a) {
+    glClearColor(r, g, b, a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RendererGL3::end_frame() {
-    // rien pour l'instant
+    glfwSwapBuffers(window);
 }
 
 void RendererGL3::shutdown() {
-    // rien pour l’instant
+    window = nullptr;
 }
