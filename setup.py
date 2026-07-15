@@ -27,6 +27,7 @@ global_include_dirs = [
     "engine/core/inputs",
     "engine/core/renderer",
     "engine/core/backend/gl3",
+    "engine/core/backend/gl3/glad",
 ]
 
 # --- EXTENSIONS CYTHON ---
@@ -87,12 +88,19 @@ extensions = [
         extra_link_args=extra_link_args,
     ),
 
-    # --- BACKEND GL3 (VERSION PROPRE) ---
+    # --- BACKEND GL3 (VERSION FINALE) ---
     Extension(
         "engine.cython.backend.gl3.gl3",
         sources=[
             "engine/cython/backend/gl3/gl3.pyx",
-            *collect_cpp("engine/core/backend/gl3"),
+
+            # fichiers C++ du backend GL3
+            "engine/core/backend/gl3/RendererGL3.cpp",
+            "engine/core/backend/gl3/MeshGL3.cpp",
+            "engine/core/backend/gl3/ShaderGL3.cpp",
+
+            # loader GLAD
+            "engine/core/backend/gl3/glad/glad.c",
         ],
         include_dirs=global_include_dirs,
         language="c++",

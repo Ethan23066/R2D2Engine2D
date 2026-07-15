@@ -15,16 +15,12 @@ RendererManager::~RendererManager() {
     }
 }
 
-bool RendererManager::init() {
-    return backend->init();
-}
-
-void RendererManager::resize(int w, int h) {
-    backend->resize(w, h);
+bool RendererManager::init(GLFWwindow* window, int w, int h) {
+    return backend->init(window, w, h);
 }
 
 void RendererManager::begin_frame() {
-    backend->begin_frame();
+    backend->begin_frame(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
 void RendererManager::end_frame() {

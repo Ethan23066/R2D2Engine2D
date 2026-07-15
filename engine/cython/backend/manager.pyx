@@ -1,22 +1,20 @@
-from engine.cython.backend.gl3.gl3 cimport RendererGL3
+# engine/cython/backend/manager.pyx
 
-cdef class PyRendererGL3:
-    cdef RendererGL3* ptr
+from engine.cython.backend.gl3.gl3 import PyRendererGL3
 
-    def __cinit__(self):
-        self.ptr = new RendererGL3()
 
-    def init(self):
-        return self.ptr.init()
+class BackendManager:
+    def __init__(self):
+        self.renderer = PyRendererGL3()
 
-    def resize(self, int w, int h):
-        self.ptr.resize(w, h)
+    def init(self, window_ptr: int, w: int, h: int):
+        return self.renderer.init(window_ptr, w, h)
 
-    def begin_frame(self):
-        self.ptr.begin_frame()
+    def begin_frame(self, r: float = 0.1, g: float = 0.1, b: float = 0.1, a: float = 1.0):
+        self.renderer.begin_frame(r, g, b, a)
 
     def end_frame(self):
-        self.ptr.end_frame()
+        self.renderer.end_frame()
 
     def shutdown(self):
-        self.ptr.shutdown()
+        self.renderer.shutdown()
