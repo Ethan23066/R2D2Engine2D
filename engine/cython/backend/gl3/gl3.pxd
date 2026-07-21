@@ -2,14 +2,20 @@
 
 from libcpp.string cimport string
 
+# Déclaration GLFW
+cdef extern from "GLFW/glfw3.h":
+    ctypedef struct GLFWwindow
+
+# RendererGL3
 cdef extern from "RendererGL3.hpp" namespace "":
     cdef cppclass RendererGL3:
         RendererGL3()
-        bool init(void* window, int w, int h)
+        bool init(GLFWwindow* window, int w, int h)
         void begin_frame(float r, float g, float b, float a)
         void end_frame()
         void shutdown()
 
+# MeshGL3
 cdef extern from "MeshGL3.hpp" namespace "":
     cdef cppclass MeshGL3:
         MeshGL3()
@@ -18,6 +24,7 @@ cdef extern from "MeshGL3.hpp" namespace "":
         void draw() const
         void destroy()
 
+# ShaderGL3
 cdef extern from "ShaderGL3.hpp" namespace "":
     cdef cppclass ShaderGL3:
         ShaderGL3()
