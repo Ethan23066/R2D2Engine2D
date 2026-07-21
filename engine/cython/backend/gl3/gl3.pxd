@@ -1,8 +1,8 @@
-# engine/cython/backend/gl3/gl3.pxd
+# GLAD d'abord
+cdef extern from "glad/glad.h":
+    pass
 
-from libcpp.string cimport string
-
-# Déclaration GLFW
+# Puis GLFW
 cdef extern from "GLFW/glfw3.h":
     ctypedef struct GLFWwindow
 
@@ -25,9 +25,12 @@ cdef extern from "MeshGL3.hpp" namespace "":
         void destroy()
 
 # ShaderGL3
+from libcpp.string cimport string
+
 cdef extern from "ShaderGL3.hpp" namespace "":
     cdef cppclass ShaderGL3:
         ShaderGL3()
         bool load(const string& vs, const string& fs)
         void bind() const
         void destroy()
+
