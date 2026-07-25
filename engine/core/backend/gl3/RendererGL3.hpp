@@ -1,13 +1,14 @@
 #pragma once
 #include "glad/glad.h"
-#include <GLFW/glfw3.h>
 
 struct RendererGL3 {
-    GLFWwindow* window = nullptr;
+    void* window = nullptr;
     int width = 0;
     int height = 0;
 
-    bool init(GLFWwindow* win, int w, int h);
+    RendererGL3();
+
+    bool init(void* win, int w, int h);
     void begin_frame(float r, float g, float b, float a);
     void end_frame();
     void shutdown();
