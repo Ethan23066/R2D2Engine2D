@@ -2,7 +2,7 @@
 
 RendererGL3::RendererGL3() {}
 
-bool RendererGL3::init(void* win, int w, int h) {
+int RendererGL3::init(void* win, int w, int h) {
     this->window = win;
     this->width = w;
     this->height = h;

@@ -1,7 +1,7 @@
 cdef extern from "RendererGL3.hpp":
     cdef cppclass RendererGL3:
         RendererGL3()
-        bool init(void* window, int w, int h)
+        int init(void* window, int w, int h)
         void begin_frame(float r, float g, float b, float a)
         void end_frame()
         void shutdown()

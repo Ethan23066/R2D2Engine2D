@@ -8,7 +8,7 @@ struct RendererGL3 {
 
     RendererGL3();
 
-    bool init(void* win, int w, int h);
+    int init(void* win, int w, int h);
     void begin_frame(float r, float g, float b, float a);
     void end_frame();
     void shutdown();
