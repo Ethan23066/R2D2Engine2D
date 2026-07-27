@@ -1,35 +1,28 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from distutils.command.build_ext import build_ext
-import os
-import sys
-import time
+import os, sys, time
 
-# ---------------- Barre de progression ----------------
+# ---------------- Progress bar ----------------
 
 def progress_bar(current, total, prefix="Compiling"):
-    bar_len = 40
+    bar_len = 100
     filled = int(bar_len * current / total)
     bar = "█" * filled + "░" * (bar_len - filled)
     sys.stdout.write(f"\r{prefix} [{bar}] {current}/{total}")
     sys.stdout.flush()
 
-
 class BuildWithProgress(build_ext):
     def build_extensions(self):
         total = len(self.extensions)
         current = 0
-
-        print("\n>>> R2D2Engine2D — Compilation complète <<<\n")
-
+        print("\n>>> R2D2Engine2D — Compilation <<<\n")
         for ext in self.extensions:
             current += 1
             progress_bar(current, total, prefix=f"Building {ext.name}")
             super().build_extension(ext)
             time.sleep(0.05)
-
         print("\n\n>>> Compilation terminée ! <<<\n")
-
 
 # ---------------- Scan utilitaire ----------------
 
@@ -40,7 +33,6 @@ def scan(folder, ext):
             if f.endswith(ext):
                 out.append(os.path.join(root, f))
     return out
-
 
 # ---------------- Dossiers EXACTEMENT comme ton tree ----------------
 
@@ -82,8 +74,7 @@ C_FLAGS = [
 
 extensions = []
 
-# ---------------- GLAD (C pur) ----------------
-# Compilé en C, avec CFLAGS → aucun warning
+# ---------------- GLAD loader (C pur) ----------------
 
 extensions.append(
     Extension(
@@ -96,17 +87,14 @@ extensions.append(
     )
 )
 
-# ---------------- Compilation totale : chaque .pyx devient une extension ----------------
+# ---------------- Compilation Cython ----------------
 
 for module_dir in MODULE_DIRS:
 
     pyx_files = scan(module_dir, ".pyx")
     cpp_files = scan(module_dir, ".cpp")
 
-    cpp_files = [
-        c for c in cpp_files
-        if "engine/cython" not in c
-    ]
+    cpp_files = [c for c in cpp_files if "engine/cython" not in c]
 
     for core_dir in CORE_DIRS:
         if module_dir.split("/")[-1] in core_dir:
@@ -115,11 +103,12 @@ for module_dir in MODULE_DIRS:
     for pyx in pyx_files:
         module_name = pyx.replace("/", ".").replace(".pyx", "")
 
-        # ---------------- Détection GL3 + manager.so ----------------
         uses_gl3 = (
             "backend/gl3" in module_dir
             or module_name.endswith("backend.manager")
         )
+
+        is_window = module_name.endswith("window.engine_window")
 
         if uses_gl3:
             cpp_files.append("engine/core/backend/gl3/glad/glad.c")
@@ -134,23 +123,12 @@ for module_dir in MODULE_DIRS:
         if uses_gl3:
             ext_kwargs["libraries"] = ["GL"]
 
-        extensions.append(
-            Extension(
-                module_name,
-                **ext_kwargs,
-            )
-        )
+        if is_window:
+            ext_kwargs["libraries"] = ["glfw", "GL"]
 
+        extensions.append(Extension(module_name, **ext_kwargs))
 
-# ---------------- Compilation Cython ----------------
-
-extensions = cythonize(
-    extensions,
-    language_level=3,
-    annotate=True,
-)
-
-# ---------------- Setup ----------------
+extensions = cythonize(extensions, language_level=3, annotate=True)
 
 setup(
     name="R2D2Engine2D",
