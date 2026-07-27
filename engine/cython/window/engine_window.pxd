@@ -1,9 +1,12 @@
+from libc.stdint cimport uintptr_t
+
 cdef extern from "engine_window.hpp":
     cdef struct EngineWindowConfig:
         int width
         int height
         const char* title
 
-    bool engine_window_init(EngineWindowConfig cfg)   # ← PAS nogil
+    int engine_window_init(EngineWindowConfig cfg)
     void engine_window_run() nogil
     void engine_window_shutdown() nogil
+    void* engine_window_get_native_handle() nogil
