@@ -1,25 +1,15 @@
 #include "manager.hpp"
-#include "log.hpp"
 
 RendererManager::RendererManager() {
     backend = new RendererGL3();
-    r2d2::Log::info("Backend forcé : GL3");
 }
 
-RendererManager::~RendererManager() {
-    if (backend) {
-        backend->shutdown();
-        delete backend;
-        backend = nullptr;
-    }
+bool RendererManager::init(void* window_ptr, int w, int h) {
+    return backend->init(window_ptr, w, h);
 }
 
-bool RendererManager::init(const EngineWindowConfig& cfg) {
-    return backend->init(cfg.width, cfg.height, cfg.title);
-}
-
-void RendererManager::begin_frame() {
-    backend->begin_frame(0.1f, 0.1f, 0.1f, 1.0f);
+void RendererManager::begin_frame(float r, float g, float b, float a) {
+    backend->begin_frame(r, g, b, a);
 }
 
 void RendererManager::end_frame() {

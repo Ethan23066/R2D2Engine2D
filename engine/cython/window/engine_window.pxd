@@ -4,6 +4,6 @@ cdef extern from "engine_window.hpp":
         int height
         const char* title
 
-    bint engine_window_init(EngineWindowConfig cfg)
-    void engine_window_run()
-    void engine_window_shutdown()
+    bool engine_window_init(EngineWindowConfig cfg)   # ← PAS nogil
+    void engine_window_run() nogil
+    void engine_window_shutdown() nogil

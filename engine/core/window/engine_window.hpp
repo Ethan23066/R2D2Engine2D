@@ -6,6 +6,9 @@ struct EngineWindowConfig {
     const char* title;
 };
 
-bool engine_window_init(EngineWindowConfig cfg);
+int engine_window_init(EngineWindowConfig cfg);
 void engine_window_run();
 void engine_window_shutdown();
+
+// nouveau : handle natif (GLFWwindow*, X11 Window, etc.)
+void* engine_window_get_native_handle();

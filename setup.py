@@ -65,7 +65,7 @@ CORE_DIRS = [
 INCLUDE_DIRS = ["." ] + MODULE_DIRS + CORE_DIRS
 
 CPP_FLAGS = [
-    "-std=c++2b",
+    "-std=c++23",
     "-O3",
     "-Wall",
     "-march=ivybridge",
@@ -73,17 +73,26 @@ CPP_FLAGS = [
     "-fPIC",
 ]
 
+C_FLAGS = [
+    "-std=c11",
+    "-O3",
+    "-Wall",
+    "-fPIC",
+]
+
 extensions = []
 
 # ---------------- GLAD (C pur) ----------------
+# Compilé en C, avec CFLAGS → aucun warning
 
 extensions.append(
     Extension(
         "engine.core.backend.gl3.glad_loader",
         sources=["engine/core/backend/gl3/glad/glad.c"],
         include_dirs=INCLUDE_DIRS,
-        extra_compile_args=["-O3", "-Wall"],
+        extra_compile_args=C_FLAGS,
         language="c",
+        libraries=["GL"],
     )
 )
 
@@ -94,13 +103,11 @@ for module_dir in MODULE_DIRS:
     pyx_files = scan(module_dir, ".pyx")
     cpp_files = scan(module_dir, ".cpp")
 
-    # ⚠️ Ne jamais compiler les .cpp générés par Cython
     cpp_files = [
         c for c in cpp_files
         if "engine/cython" not in c
     ]
 
-    # Ajoute aussi les .cpp du core correspondant
     for core_dir in CORE_DIRS:
         if module_dir.split("/")[-1] in core_dir:
             cpp_files += scan(core_dir, ".cpp")
@@ -108,13 +115,29 @@ for module_dir in MODULE_DIRS:
     for pyx in pyx_files:
         module_name = pyx.replace("/", ".").replace(".pyx", "")
 
+        # ---------------- Détection GL3 + manager.so ----------------
+        uses_gl3 = (
+            "backend/gl3" in module_dir
+            or module_name.endswith("backend.manager")
+        )
+
+        if uses_gl3:
+            cpp_files.append("engine/core/backend/gl3/glad/glad.c")
+
+        ext_kwargs = dict(
+            sources=[pyx] + cpp_files,
+            include_dirs=INCLUDE_DIRS,
+            extra_compile_args=CPP_FLAGS,
+            language="c++",
+        )
+
+        if uses_gl3:
+            ext_kwargs["libraries"] = ["GL"]
+
         extensions.append(
             Extension(
                 module_name,
-                sources=[pyx] + cpp_files,
-                include_dirs=INCLUDE_DIRS,
-                extra_compile_args=CPP_FLAGS,
-                language="c++",
+                **ext_kwargs,
             )
         )
 

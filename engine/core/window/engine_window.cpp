@@ -1,20 +1,14 @@
 #include "engine_window.hpp"
-#include <iostream>
 
-bool engine_window_init(EngineWindowConfig cfg)
-{
-    std::cout << "[engine_window] init stub: "
-              << cfg.width << "x" << cfg.height
-              << " title=" << cfg.title << "\n";
-    return true;
+int engine_window_init(EngineWindowConfig cfg) {
+    return 1; // succès
 }
 
-void engine_window_run()
-{
-    std::cout << "[engine_window] run stub\n";
+
+void engine_window_run() {
+    // rien ici → la boucle est en Python via pyglfw
 }
 
-void engine_window_shutdown()
-{
-    std::cout << "[engine_window] shutdown stub\n";
+void engine_window_shutdown() {
+    // rien ici → pyglfw gère la destruction
 }

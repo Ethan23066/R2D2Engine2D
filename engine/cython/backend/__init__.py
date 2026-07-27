@@ -1,1 +1,1 @@
-from .manager import create_renderer
+from .manager import BackendManager
