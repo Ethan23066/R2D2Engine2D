@@ -1,5 +1,4 @@
 #include "manager.hpp"
-#include "engine/core/backend/gl3/RendererGL3.hpp"
 #include "log.hpp"
 
 RendererManager::RendererManager() {
@@ -15,8 +14,8 @@ RendererManager::~RendererManager() {
     }
 }
 
-bool RendererManager::init(GLFWwindow* window, int w, int h) {
-    return backend->init(window, w, h);
+bool RendererManager::init(const EngineWindowConfig& cfg) {
+    return backend->init(cfg.width, cfg.height, cfg.title);
 }
 
 void RendererManager::begin_frame() {

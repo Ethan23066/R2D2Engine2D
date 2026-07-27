@@ -1,21 +1,35 @@
-from .engine_window cimport EngineWindowConfig, engine_window_init, engine_window_run, engine_window_shutdown
+import glfw
+from engine.cython.window.engine_window cimport EngineWindowConfig, engine_window_init
 
 cdef class EngineWindow:
     cdef EngineWindowConfig cfg
-    cdef bytes _title_bytes
+    cdef object py_window
+    cdef bytes _title_bytes  # on garde les bytes ici
 
     def __cinit__(self, int width, int height, title):
         self.cfg.width = width
         self.cfg.height = height
         self._title_bytes = title.encode("utf-8")
-        self.cfg.title = self._title_bytes
+        self.cfg.title = self._title_bytes  # pointeur vers les bytes, qui restent vivants
 
     def init(self):
-        if not engine_window_init(self.cfg):
-            raise RuntimeError("engine_window_init failed")
+        engine_window_init(self.cfg)
 
-    def run(self):
-        engine_window_run()
+        if not glfw.init():
+            raise RuntimeError("Failed to init PyGLFW")
 
-    def shutdown(self):
-        engine_window_shutdown()
+        self.py_window = glfw.create_window(
+            self.cfg.width,
+            self.cfg.height,
+            self._title_bytes.decode("utf-8"),
+            None,
+            None
+        )
+
+        if not self.py_window:
+            raise RuntimeError("Failed to create PyGLFW window")
+
+        glfw.make_context_current(self.py_window)
+
+    def ptr(self):
+        return <unsigned long> id(self.py_window)

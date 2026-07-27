@@ -1,4 +1,5 @@
 #include "RendererGL3.hpp"
+#include <iostream>
 
 RendererGL3::RendererGL3() {}
 
@@ -6,7 +7,15 @@ int RendererGL3::init(void* win, int w, int h) {
     this->window = win;
     this->width = w;
     this->height = h;
-    return true;
+
+    // PyGLFW a déjà créé le contexte OpenGL
+    if (!gladLoadGL()) {
+        std::cerr << "Failed to load GL via glad\n";
+        return 0;
+    }
+
+    glViewport(0, 0, w, h);
+    return 1;
 }
 
 void RendererGL3::begin_frame(float r, float g, float b, float a) {
@@ -15,8 +24,7 @@ void RendererGL3::begin_frame(float r, float g, float b, float a) {
 }
 
 void RendererGL3::end_frame() {
-    // GLFWwindow* glfw_win = static_cast<GLFWwindow*>(window);
-    // glfwSwapBuffers(glfw_win);
+    // Le swap est fait en Python via PyGLFW
 }
 
 void RendererGL3::shutdown() {

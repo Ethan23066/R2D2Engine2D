@@ -1,28 +1,19 @@
-# cython: language_level=3
-
-from engine.cython.backend.gl3.gl3 cimport RendererGL3, MeshGL3, ShaderGL3, Texture
-
-# ---------------- Renderer ----------------
+from engine.cython.backend.gl3.gl3 cimport RendererGL3
 
 cdef class PyRendererGL3:
-    cdef RendererGL3* ptr
+    cdef RendererGL3* _r
 
     def __cinit__(self):
-        self.ptr = new RendererGL3()   # OK : constructeur C++
+        self._r = new RendererGL3()
 
-    def __dealloc__(self):
-        if self.ptr is not NULL:
-            del self.ptr               # OK : destruction C++
+    def init(self, unsigned long window_ptr, int w, int h):
+        return self._r.init(<void*>window_ptr, w, h)
 
-    def init(self, window_ptr: int, w: int, h: int):
-        cdef void* win = <void*> window_ptr   # OK : cast Python → void*
-        return self.ptr.init(win, w, h)       # ❗ PROBLÈME SI init() RETOURNE bool
-
-    def begin_frame(self, r: float, g: float, b: float, a: float):
-        self.ptr.begin_frame(r, g, b, a)      # OK
+    def begin_frame(self, float r, float g, float b, float a):
+        self._r.begin_frame(r, g, b, a)
 
     def end_frame(self):
-        self.ptr.end_frame()                  # OK
+        self._r.end_frame()
 
     def shutdown(self):
-        self.ptr.shutdown()                   # OK
+        self._r.shutdown()
