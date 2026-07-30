@@ -8,7 +8,7 @@ def main():
 
     print("Écrans disponibles :")
     for i, name in enumerate(monitors):
-        print(f"{i} → {name}")
+     print(f"{i} → {name}")
 
     try:
         index = int(input("Choisis un écran (index) : "))
@@ -18,7 +18,12 @@ def main():
     if index < 0 or index >= len(monitors):
         index = 0
 
-    win = EngineWindow(1280, 720, "R2D2 Engine", monitor_index=index)
+    # Récupération de la résolution native du moniteur choisi
+    width, height, refresh = EngineWindow.get_monitor_mode(index)
+    print(f"Résolution native détectée : {width}x{height} @ {refresh}Hz")
+
+    # Création de la fenêtre fullscreen native
+    win = EngineWindow(width, height, "R2D2 Engine", monitor_index=index)
     win.run()
     win.shutdown()
 

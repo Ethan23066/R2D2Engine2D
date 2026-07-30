@@ -1,5 +1,10 @@
 #pragma once
-#include <GLFW/glfw3.h>
+
+struct EngineMonitorMode {
+    int width;
+    int height;
+    int refresh;
+};
 
 struct EngineWindowConfig {
     int width;
@@ -7,15 +12,10 @@ struct EngineWindowConfig {
     const char* title;
 };
 
-struct EngineMonitorInfo {
-    int monitor_count;
-    const char** monitor_names;
-};
+int engine_window_select_monitor(const EngineMonitorMode* modes, int count);
 
-int engine_window_init(EngineWindowConfig cfg, int monitor_index);
+// Ces fonctions ne gèrent PAS la fenêtre : elles reçoivent un handle Python
+int engine_window_init(const EngineWindowConfig& cfg, int monitor_index);
 void engine_window_run();
 void engine_window_shutdown();
 void* engine_window_get_native_handle();
-
-EngineMonitorInfo engine_window_list_monitors();
-void engine_window_set_monitor(int index);

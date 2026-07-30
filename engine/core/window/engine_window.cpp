@@ -1,94 +1,49 @@
 #include "engine_window.hpp"
-#include <cstdlib>
 
-static GLFWwindow* g_window = nullptr;
-static GLFWmonitor* g_selected_monitor = nullptr;
-static EngineMonitorInfo g_monitor_info = {0, nullptr};
+// Handle fourni par Python (pyGLFW)
+static void* g_native_handle = nullptr;
 
-EngineMonitorInfo engine_window_list_monitors()
+int engine_window_select_monitor(const EngineMonitorMode* modes, int count)
 {
-    if (!glfwInit())
-        return {0, nullptr};
-
-    int count = 0;
-    GLFWmonitor** monitors = glfwGetMonitors(&count);
-    if (!monitors || count == 0)
-        return {0, nullptr};
-
-    const char** names = (const char**)std::malloc(sizeof(const char*) * count);
-    for (int i = 0; i < count; ++i)
-        names[i] = glfwGetMonitorName(monitors[i]);
-
-    g_monitor_info.monitor_count = count;
-    g_monitor_info.monitor_names = names;
-    return g_monitor_info;
-}
-
-void engine_window_set_monitor(int index)
-{
-    int count = 0;
-    GLFWmonitor** monitors = glfwGetMonitors(&count);
-    if (!monitors || index < 0 || index >= count)
-        return;
-
-    g_selected_monitor = monitors[index];
-}
-
-int engine_window_init(EngineWindowConfig cfg, int monitor_index)
-{
-    if (!glfwInit())
+    if (count <= 0)
         return 0;
 
-    engine_window_set_monitor(monitor_index);
+    if (count == 2)
+        return 1;
 
-    g_window = glfwCreateWindow(
-        cfg.width,
-        cfg.height,
-        cfg.title,
-        nullptr, // fenêtré ; pour fullscreen: g_selected_monitor
-        nullptr
-    );
+    int best_index = 1;
+    int best_area = modes[1].width * modes[1].height;
 
-    if (!g_window)
-    {
-        glfwTerminate();
-        return 0;
+    for (int i = 2; i < count; ++i) {
+        int area = modes[i].width * modes[i].height;
+        if (area > best_area) {
+            best_area = area;
+            best_index = i;
+        }
     }
 
-    glfwMakeContextCurrent(g_window);
-    return 1;
+    return best_index;
+}
+
+// Python fournit le handle via Cython
+int engine_window_init(const EngineWindowConfig& cfg, int monitor_index)
+{
+    (void)cfg;
+    (void)monitor_index;
+    return 1; // rien à faire en C++
 }
 
 void engine_window_run()
 {
-    while (!glfwWindowShouldClose(g_window))
-    {
-        glfwPollEvents();
-
-        // rendu ici plus tard
-        glfwSwapBuffers(g_window);
-    }
+    // La boucle est gérée en Python (pyGLFW)
 }
 
 void engine_window_shutdown()
 {
-    if (g_window)
-    {
-        glfwDestroyWindow(g_window);
-        g_window = nullptr;
-    }
-
-    glfwTerminate();
-
-    if (g_monitor_info.monitor_names)
-    {
-        std::free(g_monitor_info.monitor_names);
-        g_monitor_info.monitor_names = nullptr;
-        g_monitor_info.monitor_count = 0;
-    }
+    g_native_handle = nullptr;
 }
 
 void* engine_window_get_native_handle()
 {
-    return (void*)g_window;
+    return g_native_handle;
 }
