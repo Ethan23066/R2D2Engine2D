@@ -108,7 +108,7 @@ for module_dir in MODULE_DIRS:
             or module_name.endswith("backend.manager")
         )
 
-        is_window = module_name.endswith("window.engine_window")
+        is_window = module_name.endswith("window.window")
 
         if uses_gl3:
             cpp_files.append("engine/core/backend/gl3/glad/glad.c")

@@ -1,4 +1,4 @@
-#include "engine_window.hpp"
+#include "window.hpp"
 
 // Handle fourni par Python (pyGLFW)
 static void* g_native_handle = nullptr;

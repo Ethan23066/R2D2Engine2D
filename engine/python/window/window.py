@@ -1,4 +1,4 @@
-from engine.cython.window.engine_window import EngineWindow
+from engine.cython.window.window import EngineWindow
 
 def main():
     monitors = EngineWindow.list_monitors()
@@ -16,7 +16,7 @@ def main():
         index = 0
 
     if index < 0 or index >= len(monitors):
-        index = 0
+        index = 01
 
     # Récupération de la résolution native du moniteur choisi
     width, height, refresh = EngineWindow.get_monitor_mode(index)

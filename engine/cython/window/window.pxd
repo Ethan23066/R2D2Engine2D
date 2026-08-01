@@ -1,4 +1,4 @@
-cdef extern from "engine_window.hpp":
+cdef extern from "window.hpp":
     cdef struct EngineMonitorMode:
         int width
         int height
