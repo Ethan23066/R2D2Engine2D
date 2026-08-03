@@ -16,7 +16,7 @@ def main():
         index = 0
 
     if index < 0 or index >= len(monitors):
-        index = 01
+        index = 0
 
     # Récupération de la résolution native du moniteur choisi
     width, height, refresh = EngineWindow.get_monitor_mode(index)
