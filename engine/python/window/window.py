@@ -25,7 +25,7 @@ def main():
     print("Modes disponibles :")
     print("0 → Fenêtré")
     print("1 → Fullscreen exclusif")
-    print("2 → Borderless fullscreen")
+
 
     try:
         mode = int(input("Choisis un mode : "))
