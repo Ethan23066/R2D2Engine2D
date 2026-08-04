@@ -66,7 +66,7 @@ CPP_FLAGS = [
 ]
 
 C_FLAGS = [
-    "-std=c23",
+    "-std=c2x",
     "-O3",
     "-Wall",
     "-fPIC",
