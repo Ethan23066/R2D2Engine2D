@@ -57,7 +57,7 @@ CORE_DIRS = [
 INCLUDE_DIRS = ["." ] + MODULE_DIRS + CORE_DIRS
 
 CPP_FLAGS = [
-    "-std=c++23",
+    "-std=c++2b",
     "-O3",
     "-Wall",
     "-march=ivybridge",
@@ -66,7 +66,7 @@ CPP_FLAGS = [
 ]
 
 C_FLAGS = [
-    "-std=c11",
+    "-std=c23",
     "-O3",
     "-Wall",
     "-fPIC",
