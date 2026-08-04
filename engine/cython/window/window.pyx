@@ -25,29 +25,61 @@ from libc.stdint cimport uintptr_t
 cdef class EngineWindow:
     cdef EngineWindowConfig cfg
     cdef int monitor_index
-    cdef object window   # <-- AJOUT
+    cdef int mode
+    cdef object window
 
-    def __cinit__(self, int width, int height, str title, int monitor_index=0):
+    def __cinit__(self, int width, int height, str title,
+                  int monitor_index=0,
+                  int mode=0):
+
         self.cfg.width = width
         self.cfg.height = height
         self.cfg.title = strdup(title.encode("utf-8"))
         self.monitor_index = monitor_index
+        self.mode = mode
 
-        # --- Appel C++ existant ---
         engine_window_init(self.cfg, self.monitor_index)
 
-        # --- AJOUT : création de la fenêtre GLFW ---
         if not glfw.init():
             raise RuntimeError("GLFW init failed")
 
-        monitors = glfw.get_monitors()
-        monitor = monitors[self.monitor_index]
-
-        self.window = glfw.create_window(width, height, title, monitor, None)
+        # Toujours créer la fenêtre SANS moniteur
+        self.window = glfw.create_window(width, height, title, None, None)
         if not self.window:
             raise RuntimeError("GLFW window creation failed")
 
         glfw.make_context_current(self.window)
+
+        # Maintenant on applique le mode
+        monitors = glfw.get_monitors()
+        monitor = monitors[self.monitor_index]
+        mode_info = glfw.get_video_mode(monitor)
+
+        if self.mode == 1:
+            # Fullscreen exclusif
+            glfw.set_window_monitor(
+                self.window,
+                monitor,
+                0, 0,
+                mode_info.size.width,
+                mode_info.size.height,
+                mode_info.refresh_rate
+            )
+
+        elif self.mode == 2:
+            # Borderless fullscreen
+            glfw.set_window_attrib(self.window, glfw.DECORATED, glfw.FALSE)
+            glfw.set_window_attrib(self.window, glfw.RESIZABLE, glfw.FALSE)
+
+            glfw.set_window_monitor(
+                self.window,
+                None,
+                0, 0,
+                mode_info.size.width,
+                mode_info.size.height,
+                mode_info.refresh_rate
+            )
+            glfw.set_window_pos(self.window, 0, 0)
 
     @staticmethod
     def list_monitors():
@@ -87,12 +119,10 @@ cdef class EngineWindow:
         return idx
 
     def run(self):
-        # --- AJOUT : boucle GLFW ---
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
             glfw.swap_buffers(self.window)
 
-        # --- Appel C++ existant ---
         engine_window_run()
 
     def shutdown(self):
