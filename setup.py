@@ -5,7 +5,6 @@ from distutils.sysconfig import customize_compiler
 import os, sys, time
 
 # ---------------- Progress bar ----------------
-
 def progress_bar(current, total, prefix="Compiling"):
     bar_len = 40
     filled = int(bar_len * current / total) if total else bar_len
@@ -13,10 +12,8 @@ def progress_bar(current, total, prefix="Compiling"):
     sys.stdout.write(f"\r{prefix} [{bar}] {current}/{total}")
     sys.stdout.flush()
 
-
 class BuildWithGlad(build_ext):
     def build_extensions(self):
-        # préparer le compilateur
         customize_compiler(self.compiler)
         self.mkpath(self.build_temp)
 
@@ -52,7 +49,6 @@ class BuildWithGlad(build_ext):
                 if glad_obj not in ext.extra_objects:
                     ext.extra_objects.append(glad_obj)
 
-            # déléguer la compilation/link standard
             super().build_extension(ext)
             time.sleep(0.02)
 
@@ -60,7 +56,6 @@ class BuildWithGlad(build_ext):
 
 
 # ---------------- helpers ----------------
-
 def find_pyx_files(base_dirs):
     out = []
     for base in base_dirs:
@@ -69,7 +64,6 @@ def find_pyx_files(base_dirs):
                 if f.endswith(".pyx"):
                     out.append(os.path.join(root, f))
     return out
-
 
 def collect_core_cpp_for_module(pyx_path):
     # Retourne une liste de .cpp core à ajouter pour ce module
@@ -88,7 +82,6 @@ def collect_core_cpp_for_module(pyx_path):
         return ["engine/core/window/window.cpp"]
     # par défaut aucun core cpp ajouté
     return []
-
 
 # ---------------- Directories ----------------
 MODULE_DIRS = [
