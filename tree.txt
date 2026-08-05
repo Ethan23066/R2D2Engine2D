@@ -1,44 +1,32 @@
 .
 ├── build
-│   ├── lib.linux-x86_64-cpython-314
-│   │   └── engine
-│   │       └── cython
-│   │           ├── base
-│   │           │   ├── config.cpython-314-x86_64-linux-gnu.so
-│   │           │   ├── events.cpython-314-x86_64-linux-gnu.so
-│   │           │   ├── lifecycle.cpython-314-x86_64-linux-gnu.so
-│   │           │   ├── log.cpython-314-x86_64-linux-gnu.so
-│   │           │   ├── system.cpython-314-x86_64-linux-gnu.so
-│   │           │   └── time.cpython-314-x86_64-linux-gnu.so
-│   │           ├── input
-│   │           │   └── input.cpython-314-x86_64-linux-gnu.so
-│   │           ├── renderer
-│   │           │   └── renderer.cpython-314-x86_64-linux-gnu.so
-│   │           └── window
-│   │               └── engine_window.cpython-314-x86_64-linux-gnu.so
-│   └── temp.linux-x86_64-cpython-314
+│   └── temp.linux-x86_64-cpython-314t
 │       └── engine
 │           ├── core
 │           │   ├── backend
 │           │   │   └── gl3
-│           │   │       └── RendererGL3.o
+│           │   │       ├── glad
+│           │   │       │   └── glad.o
+│           │   │       ├── MeshGL3.o
+│           │   │       ├── RendererGL3.o
+│           │   │       ├── ShaderGL3.o
+│           │   │       └── Texture.o
 │           │   ├── base
 │           │   │   ├── config.o
 │           │   │   ├── events.o
 │           │   │   ├── lifecycle.o
 │           │   │   ├── log.o
-│           │   │   ├── manager.o
 │           │   │   ├── system.o
 │           │   │   └── time.o
 │           │   ├── inputs
 │           │   │   └── input.o
-│           │   ├── renderer
-│           │   │   └── renderer.o
 │           │   └── window
-│           │       └── engine_window.o
+│           │       └── window.o
 │           └── cython
 │               ├── backend
-│               │   └── gl3
+│               │   ├── gl3
+│               │   │   └── gl3.o
+│               │   └── manager.o
 │               ├── base
 │               │   ├── config.o
 │               │   ├── events.o
@@ -48,25 +36,28 @@
 │               │   └── time.o
 │               ├── input
 │               │   └── input.o
-│               ├── renderer
-│               │   └── renderer.o
 │               └── window
-│                   └── engine_window.o
+│                   └── window.o
 ├── engine
 │   ├── core
 │   │   ├── backend
 │   │   │   ├── gl3
-│   │   │   │   ├── Mesh.cpp
-│   │   │   │   ├── Mesh.hpp
+│   │   │   │   ├── glad
+│   │   │   │   │   ├── glad.c
+│   │   │   │   │   ├── glad.h
+│   │   │   │   │   └── khrplatform.h
+│   │   │   │   ├── glad_loader.cpython-314t-x86_64-linux-gnu.so
+│   │   │   │   ├── MeshGL3.cpp
+│   │   │   │   ├── MeshGL3.hpp
 │   │   │   │   ├── RendererGL3.cpp
 │   │   │   │   ├── RendererGL3.hpp
-│   │   │   │   ├── Shader.cpp
-│   │   │   │   ├── Shader.hpp
+│   │   │   │   ├── ShaderGL3.cpp
+│   │   │   │   ├── ShaderGL3.hpp
 │   │   │   │   ├── Texture.cpp
 │   │   │   │   └── Texture.hpp
-│   │   │   ├── gl4
-│   │   │   ├── gles2
-│   │   │   └── gles3
+│   │   │   ├── gles3
+│   │   │   ├── manager.cpp
+│   │   │   └── manager.hpp
 │   │   ├── base
 │   │   │   ├── config.cpp
 │   │   │   ├── config.hpp
@@ -76,8 +67,6 @@
 │   │   │   ├── lifecycle.hpp
 │   │   │   ├── log.cpp
 │   │   │   ├── log.hpp
-│   │   │   ├── manager.cpp
-│   │   │   ├── manager.hpp
 │   │   │   ├── system.cpp
 │   │   │   ├── system.hpp
 │   │   │   ├── time.cpp
@@ -85,60 +74,60 @@
 │   │   ├── inputs
 │   │   │   ├── input.cpp
 │   │   │   └── input.hpp
-│   │   ├── renderer
-│   │   │   ├── renderer.cpp
-│   │   │   └── renderer.hpp
 │   │   └── window
-│   │       ├── engine_window.cpp
-│   │       └── engine_window.hpp
+│   │       ├── window.cpp
+│   │       └── window.hpp
 │   ├── cython
 │   │   ├── backend
 │   │   │   ├── gl3
 │   │   │   │   ├── gl3.cpp
+│   │   │   │   ├── gl3.cpython-314t-x86_64-linux-gnu.so
 │   │   │   │   ├── gl3.html
 │   │   │   │   ├── gl3.pxd
-│   │   │   │   └── gl3.pyx
-│   │   │   ├── gl4
-│   │   │   ├── gles2
+│   │   │   │   ├── gl3.pyx
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── __pycache__
+│   │   │   │       └── __init__.cpython-314.pyc
 │   │   │   ├── gles3
 │   │   │   ├── __init__.py
-│   │   │   ├── manager.c
 │   │   │   ├── manager.cpp
+│   │   │   ├── manager.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── manager.html
 │   │   │   ├── manager.pxd
-│   │   │   └── manager.pyx
+│   │   │   ├── manager.pyx
+│   │   │   └── __pycache__
+│   │   │       └── __init__.cpython-314.pyc
 │   │   ├── base
 │   │   │   ├── config.cpp
-│   │   │   ├── config.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── config.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── config.html
 │   │   │   ├── config.pxd
 │   │   │   ├── config.pyx
-│   │   │   ├── core.pxd
 │   │   │   ├── events.cpp
-│   │   │   ├── events.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── events.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── events.html
 │   │   │   ├── events.pxd
 │   │   │   ├── events.pyx
 │   │   │   ├── __init__.py
 │   │   │   ├── lifecycle.cpp
-│   │   │   ├── lifecycle.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── lifecycle.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── lifecycle.html
 │   │   │   ├── lifecycle.pxd
 │   │   │   ├── lifecycle.pyx
 │   │   │   ├── log.cpp
-│   │   │   ├── log.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── log.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── log.html
 │   │   │   ├── log.pxd
 │   │   │   ├── log.pyx
 │   │   │   ├── __pycache__
 │   │   │   │   └── __init__.cpython-314.pyc
 │   │   │   ├── system.cpp
-│   │   │   ├── system.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── system.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── system.html
 │   │   │   ├── system.pxd
 │   │   │   ├── system.pyx
 │   │   │   ├── time.cpp
-│   │   │   ├── time.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── time.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── time.html
 │   │   │   ├── time.pxd
 │   │   │   └── time.pyx
@@ -146,26 +135,27 @@
 │   │   ├── input
 │   │   │   ├── __init__.py
 │   │   │   ├── input.cpp
-│   │   │   ├── input.cpython-314-x86_64-linux-gnu.so
+│   │   │   ├── input.cpython-314t-x86_64-linux-gnu.so
 │   │   │   ├── input.html
 │   │   │   ├── input.pxd
 │   │   │   └── input.pyx
-│   │   ├── renderer
-│   │   │   ├── __init__.py
-│   │   │   ├── renderer.cpp
-│   │   │   ├── renderer.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── renderer.html
-│   │   │   ├── renderer.pxd
-│   │   │   └── renderer.pyx
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   └── __init__.cpython-314.pyc
 │   │   └── window
-│   │       ├── engine_window.cpp
-│   │       ├── engine_window.cpython-314-x86_64-linux-gnu.so
-│   │       ├── engine_window.html
-│   │       ├── engine_window.pxd
-│   │       ├── engine_window.pyx
 │   │       ├── __init__.py
-│   │       └── __pycache__
-│   │           └── __init__.cpython-314.pyc
+│   │       ├── __pycache__
+│   │       │   ├── __init__.cpython-313.pyc
+│   │       │   └── __init__.cpython-314.pyc
+│   │       ├── window.cpp
+│   │       ├── window.cpython-314t-x86_64-linux-gnu.so
+│   │       ├── window.html
+│   │       ├── window.pxd
+│   │       └── window.pyx
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   └── __init__.cpython-314.pyc
 │   └── python
 │       ├── base
 │       │   ├── config.py
@@ -173,27 +163,34 @@
 │       │   ├── __init__.py
 │       │   ├── lifecycle.py
 │       │   ├── log.py
-│       │   ├── r2d2engine2d.py
+│       │   ├── __pycache__
+│       │   │   ├── config.cpython-314.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   └── r2d2core.cpython-314.pyc
+│       │   ├── r2d2core.py
 │       │   ├── system.py
 │       │   └── time.py
 │       ├── __init__.py
 │       ├── input
 │       │   ├── __init__.py
 │       │   └── input.py
+│       ├── __pycache__
+│       │   └── __init__.cpython-314.pyc
 │       ├── renderer
 │       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   └── renderer.cpython-314.pyc
 │       │   └── renderer.py
 │       └── window
-│           ├── engine_window.py
-│           └── __init__.py
+│           ├── __init__.py
+│           ├── __pycache__
+│           │   ├── __init__.cpython-314.pyc
+│           │   └── window.cpython-314.pyc
+│           └── window.py
 ├── README.md
 ├── setup.py
-├── shaders
-│   ├── gpu_stress.frag
-│   ├── gpu_stress.vert
-│   ├── quad.frag
-│   └── quad.vert
 ├── tasks.txt
 └── tree.txt
 
-54 directories, 143 files
+48 directories, 146 files
