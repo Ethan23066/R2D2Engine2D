@@ -7,6 +7,11 @@ cdef class PyTime:
     def __cinit__(self):
         self._c = new CTime()
 
+    def __dealloc__(self):
+        if self._c is not NULL:
+            del self._c
+            self._c = NULL
+
     def update(self):
         self._c.update()
 
