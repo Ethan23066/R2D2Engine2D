@@ -11,16 +11,18 @@ cdef extern from "window.hpp":
         int height
         const char* title
 
-    int engine_window_select_monitor(const EngineMonitorMode* modes, int count)
-    int engine_window_init(const EngineWindowConfig& cfg, int monitor_index)
-    void engine_window_run()
-    void engine_window_shutdown()
-    void* engine_window_get_native_handle()
+    int engine_window_select_monitor(const EngineMonitorMode* modes, int count) nogil
+    int engine_window_init(const EngineWindowConfig* cfg, int monitor_index) nogil
+    void engine_window_run() nogil
+    void engine_window_shutdown() nogil
+    void* engine_window_get_native_handle() nogil
 
 import glfw
-from libc.stdlib cimport malloc, free, NULL
+from libc.stdlib cimport malloc, free
 from libc.string cimport strdup
 from libc.stdint cimport uintptr_t
+
+cdef void* NULL = <void*>0
 
 cdef class EngineWindow:
     cdef EngineWindowConfig cfg
@@ -32,34 +34,29 @@ cdef class EngineWindow:
                   int monitor_index=0,
                   int mode=0):
 
-        # init config values and ensure title pointer is NULL if not set
         self.cfg.width = width
         self.cfg.height = height
         self.cfg.title = NULL
         self.monitor_index = monitor_index
         self.mode = mode
 
-        # copy title into a native C string (strdup makes its own copy)
         cdef bytes _b = title.encode("utf-8")
         cdef const char* _tmp = _b
         self.cfg.title = strdup(_tmp)
 
-        engine_window_init(self.cfg, self.monitor_index)
+        engine_window_init(&self.cfg, self.monitor_index)
 
         if not glfw.init():
             raise RuntimeError("GLFW init failed")
 
-        # Toujours créer la fenêtre SANS moniteur
         self.window = glfw.create_window(width, height, title, None, None)
         if not self.window:
             raise RuntimeError("GLFW window creation failed")
 
         glfw.make_context_current(self.window)
 
-        # Maintenant on applique le mode (safety checks)
         monitors = glfw.get_monitors()
         if not monitors:
-            # no monitors available — just keep window as-is
             return
 
         if self.monitor_index < 0 or self.monitor_index >= len(monitors):
@@ -70,7 +67,6 @@ cdef class EngineWindow:
         if not mode_info:
             return
 
-        # extract width/height/refresh_rate robustly (support different pyGLFW versions)
         try:
             w = mode_info.width
             h = mode_info.height
@@ -83,7 +79,6 @@ cdef class EngineWindow:
                 w = 0
                 h = 0
 
-        # refresh rate might be named differently
         r = getattr(mode_info, 'refresh_rate', None)
         if r is None:
             r = getattr(mode_info, 'refreshRate', 0)
@@ -91,7 +86,6 @@ cdef class EngineWindow:
             r = 0
 
         if self.mode == 1:
-            # Fullscreen exclusif
             glfw.set_window_monitor(
                 self.window,
                 monitor,
@@ -102,7 +96,6 @@ cdef class EngineWindow:
             )
 
         elif self.mode == 2:
-            # Borderless fullscreen
             glfw.set_window_attrib(self.window, glfw.DECORATED, glfw.FALSE)
             glfw.set_window_attrib(self.window, glfw.RESIZABLE, glfw.FALSE)
 
@@ -204,7 +197,6 @@ cdef class EngineWindow:
         engine_window_shutdown()
 
     def __dealloc__(self):
-        # ensure native title memory is freed if object is GC'ed without explicit shutdown
         if self.cfg.title != NULL:
             try:
                 free(<void*> self.cfg.title)
@@ -213,4 +205,5 @@ cdef class EngineWindow:
             self.cfg.title = NULL
 
     def get_native_handle(self):
-        return <uintptr_t> engine_window_get_native_handle()
+        cdef uintptr_t h = <uintptr_t> engine_window_get_native_handle()
+        return h
