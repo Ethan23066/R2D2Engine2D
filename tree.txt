@@ -1,6 +1,6 @@
 .
 ├── build
-│   └── temp.linux-x86_64-cpython-314t
+│   └── temp.linux-x86_64-cpython-314
 │       └── engine
 │           ├── core
 │           │   ├── backend
@@ -82,6 +82,7 @@
 │   │   │   ├── gl3
 │   │   │   │   ├── gl3.cpp
 │   │   │   │   ├── gl3.cpython-314t-x86_64-linux-gnu.so
+│   │   │   │   ├── gl3.cpython-314-x86_64-linux-gnu.so
 │   │   │   │   ├── gl3.html
 │   │   │   │   ├── gl3.pxd
 │   │   │   │   ├── gl3.pyx
@@ -91,52 +92,44 @@
 │   │   │   ├── gles3
 │   │   │   ├── __init__.py
 │   │   │   ├── manager.cpp
-│   │   │   ├── manager.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── manager.html
+│   │   │   ├── manager.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── manager.pxd
 │   │   │   ├── manager.pyx
 │   │   │   └── __pycache__
 │   │   │       └── __init__.cpython-314.pyc
 │   │   ├── base
 │   │   │   ├── config.cpp
-│   │   │   ├── config.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── config.html
+│   │   │   ├── config.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── config.pxd
 │   │   │   ├── config.pyx
 │   │   │   ├── events.cpp
-│   │   │   ├── events.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── events.html
+│   │   │   ├── events.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── events.pxd
 │   │   │   ├── events.pyx
 │   │   │   ├── __init__.py
 │   │   │   ├── lifecycle.cpp
-│   │   │   ├── lifecycle.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── lifecycle.html
+│   │   │   ├── lifecycle.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── lifecycle.pxd
 │   │   │   ├── lifecycle.pyx
 │   │   │   ├── log.cpp
-│   │   │   ├── log.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── log.html
+│   │   │   ├── log.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── log.pxd
 │   │   │   ├── log.pyx
 │   │   │   ├── __pycache__
 │   │   │   │   └── __init__.cpython-314.pyc
 │   │   │   ├── system.cpp
-│   │   │   ├── system.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── system.html
+│   │   │   ├── system.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── system.pxd
 │   │   │   ├── system.pyx
 │   │   │   ├── time.cpp
-│   │   │   ├── time.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── time.html
+│   │   │   ├── time.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── time.pxd
 │   │   │   └── time.pyx
 │   │   ├── __init__.py
 │   │   ├── input
 │   │   │   ├── __init__.py
 │   │   │   ├── input.cpp
-│   │   │   ├── input.cpython-314t-x86_64-linux-gnu.so
-│   │   │   ├── input.html
+│   │   │   ├── input.cpython-314-x86_64-linux-gnu.so
 │   │   │   ├── input.pxd
 │   │   │   └── input.pyx
 │   │   ├── __pycache__
@@ -148,8 +141,7 @@
 │   │       │   ├── __init__.cpython-313.pyc
 │   │       │   └── __init__.cpython-314.pyc
 │   │       ├── window.cpp
-│   │       ├── window.cpython-314t-x86_64-linux-gnu.so
-│   │       ├── window.html
+│   │       ├── window.cpython-314-x86_64-linux-gnu.so
 │   │       ├── window.pxd
 │   │       └── window.pyx
 │   ├── __init__.py
@@ -190,7 +182,6 @@
 │           └── window.py
 ├── README.md
 ├── setup.py
-├── tasks.txt
 └── tree.txt
 
-48 directories, 146 files
+48 directories, 137 files
