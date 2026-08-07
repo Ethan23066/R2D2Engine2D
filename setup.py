@@ -39,8 +39,8 @@ CPP_FLAGS = [
     "-std=c++2b",
     "-O3",
     "-Wall",
-    "-march=ivybridge",
-    "-mtune=ivybridge",
+    "-march=x86-64",
+    "-mtune=generic",
     "-fPIC",
 ]
 
@@ -48,8 +48,11 @@ C_FLAGS = [
     "-std=c23",
     "-O3",
     "-Wall",
+    "-march=x86-64",
+    "-mtune=generic",
     "-fPIC",
 ]
+
 
 # ---------------- SCANNER : C++ headers ----------------
 def scan_cpp_symbols():
