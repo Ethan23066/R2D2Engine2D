@@ -26,7 +26,7 @@ int engine_window_select_monitor(const EngineMonitorMode* modes, int count)
 }
 
 // Python fournit le handle via Cython
-int engine_window_init(const EngineWindowConfig& cfg, int monitor_index)
+int engine_window_init(const EngineWindowConfig* cfg, int monitor_index)
 {
     (void)cfg;
     (void)monitor_index;
