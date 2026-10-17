@@ -1,3 +1,8 @@
+// WARNING: This file is intentionally kept as a compatibility fallback for legacy
+// builds. The project is migrating to CMake + nanobind. Use CMake for the real
+// build path (see MIGRATION_CMAKE.md). This file is not the canonical build
+// setup anymore.
+
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from distutils.command.build_ext import build_ext
@@ -5,7 +10,10 @@ from distutils.sysconfig import customize_compiler
 import os, sys, time, multiprocessing
 import re
 
-# ---------------- Progress bar ----------------
+# -----------------------------------------------------------------------------
+# Progress bar / diagnostics
+# -----------------------------------------------------------------------------
+
 def progress_bar(current, total, prefix="Compiling"):
     bar_len = 40
     filled = int(bar_len * current / total) if total else bar_len
@@ -13,7 +21,9 @@ def progress_bar(current, total, prefix="Compiling"):
     sys.stdout.write(f"\r{prefix} [{bar}] {current}/{total}")
     sys.stdout.flush()
 
-# ---------------- Directories ----------------
+# -----------------------------------------------------------------------------
+# Build directories and include paths
+# -----------------------------------------------------------------------------
 MODULE_DIRS = [
     "engine/cython/backend",
     "engine/cython/backend/gl3",
@@ -34,7 +44,6 @@ CORE_DIRS = [
 
 INCLUDE_DIRS = ["."] + MODULE_DIRS + CORE_DIRS
 
-# ---------------- Flags ----------------
 CPP_FLAGS = [
     "-std=c++2b",
     "-O3",
@@ -53,11 +62,14 @@ C_FLAGS = [
     "-fPIC",
 ]
 
+# -----------------------------------------------------------------------------
+# Scanner utilities (legacy only)
+# -----------------------------------------------------------------------------
 
-# ---------------- SCANNER : C++ headers ----------------
+
 def scan_cpp_symbols():
+    """Legacy scan used to identify C++ APIs to expose to Cython."""
     print("\n>>> Scan des symboles C++ exposés <<<\n")
-
     hpp_files = []
     for base in CORE_DIRS:
         for root, _, files in os.walk(base):
@@ -66,10 +78,7 @@ def scan_cpp_symbols():
                     hpp_files.append(os.path.join(root, f))
 
     exposed = {}
-
-    sig_re = re.compile(
-        r"(?:int|void|bool|float|double)\s+([A-Za-z0-9_:]+)\s*\(([^)]*)\)"
-    )
+    sig_re = re.compile(r"(?:int|void|bool|float|double)\s+([A-Za-z0-9_:]+)\s*\(([^)]*)\)")
 
     for hpp in hpp_files:
         with open(hpp, "r", encoding="utf-8") as f:
@@ -78,19 +87,15 @@ def scan_cpp_symbols():
         for match in sig_re.finditer(content):
             func = match.group(1)
             args = match.group(2)
-            exposed[func] = {
-                "file": hpp,
-                "args": args,
-                "ref_problem": "&" in args,
-            }
+            exposed[func] = {"file": hpp, "args": args, "ref_problem": "&" in args}
 
     print(f"Trouvé {len(exposed)} fonctions exposées.\n")
     return exposed
 
-# ---------------- SCANNER : .pxd Cython ----------------
-def scan_pxd_calls():
-    print("\n>>> Scan des appels Cython (.pxd) <<<\n")
 
+def scan_pxd_calls():
+    """Legacy scan used to map pxd declarations to native APIs."""
+    print("\n>>> Scan des appels Cython (.pxd) <<<\n")
     pxd_files = []
     for base in MODULE_DIRS:
         for root, _, files in os.walk(base):
@@ -99,10 +104,7 @@ def scan_pxd_calls():
                     pxd_files.append(os.path.join(root, f))
 
     calls = {}
-
-    call_re = re.compile(
-        r"(?:int|void|bool|float|double)\s+([A-Za-z0-9_]+)\s*\("
-    )
+    call_re = re.compile(r"(?:int|void|bool|float|double)\s+([A-Za-z0-9_]+)\s*\(")
 
     for pxd in pxd_files:
         with open(pxd, "r", encoding="utf-8") as f:
@@ -115,10 +117,9 @@ def scan_pxd_calls():
     print(f"Trouvé {len(calls)} appels Cython.\n")
     return calls
 
-# ---------------- SCANNER : Analyse du linkage ----------------
+
 def scan_linking(exposed, calls):
     print("\n>>> Analyse du linkage <<<\n")
-
     for func, info in exposed.items():
         if func not in calls:
             continue
@@ -126,14 +127,12 @@ def scan_linking(exposed, calls):
         print(f"- Fonction {func}:")
         print(f"  - Header : {info['file']}")
         print(f"  - Appelée dans : {calls[func]}")
-
         if info["ref_problem"]:
             print("  ⚠ Signature problématique : référence C++ détectée (const T&)")
             print("    → convertir en pointeur T* ou ajouter un wrapper")
-
         print()
 
-# ---------------- helpers ----------------
+
 def find_pyx_files(base_dirs):
     out = []
     for base in base_dirs:
@@ -143,11 +142,11 @@ def find_pyx_files(base_dirs):
                     out.append(os.path.join(root, f))
     return out
 
-# ---------------- CORRECTED: collect_core_cpp_for_module ----------------
+
 def collect_core_cpp_for_module(pyx_path):
+    """Legacy mapping: associate each Cython module to native engine sources."""
     parts = pyx_path.replace("\\", "/").split("/")
 
-    # GL3 backend
     if "backend" in parts and "gl3" in parts:
         return [
             "engine/core/backend/gl3/MeshGL3.cpp",
@@ -156,13 +155,9 @@ def collect_core_cpp_for_module(pyx_path):
             "engine/core/backend/gl3/Texture.cpp",
         ]
 
-    # Window
     if "window" in parts:
-        return [
-            "engine/core/window/window.cpp",
-        ]
+        return ["engine/core/window/window.cpp"]
 
-    # Base (events, lifecycle, config, log, system, time)
     if "base" in parts:
         return [
             "engine/core/base/config.cpp",
@@ -173,19 +168,19 @@ def collect_core_cpp_for_module(pyx_path):
             "engine/core/base/time.cpp",
         ]
 
-    # Inputs
     if "input" in parts:
-        return [
-            "engine/core/inputs/input.cpp",
-        ]
+        return ["engine/core/inputs/input.cpp"]
 
-    # Renderer (pas de .cpp dans core/renderer)
     if "renderer" in parts:
         return []
 
     return []
 
-# ---------------- Build class ----------------
+# -----------------------------------------------------------------------------
+# Legacy build class
+# -----------------------------------------------------------------------------
+
+
 class BuildWithGlad(build_ext):
     def build_extensions(self):
         try:
@@ -232,19 +227,19 @@ class BuildWithGlad(build_ext):
 
         print("\n\n>>> Compilation terminée ! <<<\n")
 
-# ---------------- SCAN avant compilation ----------------
+# -----------------------------------------------------------------------------
+# Legacy build list
+# -----------------------------------------------------------------------------
+
 exposed = scan_cpp_symbols()
 calls = scan_pxd_calls()
 scan_linking(exposed, calls)
 
-# ---------------- Build extensions ----------------
 extensions = []
-
 pyx_files = find_pyx_files(MODULE_DIRS)
 for pyx in pyx_files:
     module_name = pyx.replace("/", ".").replace(".pyx", "")
     sources = [pyx]
-
     core_cpp = collect_core_cpp_for_module(pyx)
     sources += core_cpp
 

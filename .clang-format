@@ -1,0 +1,17 @@
+# .clang-format
+# Simple, readable LLVM-like style with 4-space indentation and trailing commas
+# for C++/C. Good default for C++23 and C23 projects.
+
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+SortIncludes: true
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: Empty
+PointerAlignment: Right
+ReferenceAlignment: Right
+AlignAfterOpenBracket: Align
+SpaceBeforeParens: ControlStatements
+AlwaysBreakTemplateDeclarations: Yes
