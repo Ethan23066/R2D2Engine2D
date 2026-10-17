@@ -3,19 +3,24 @@
 struct EngineMonitorMode {
     int width;
     int height;
-    int refresh;
+    int refresh_rate;
 };
 
 struct EngineWindowConfig {
     int width;
     int height;
     const char* title;
+    bool fullscreen;
+    bool resizable;
 };
 
 int engine_window_select_monitor(const EngineMonitorMode* modes, int count);
 
-// Ces fonctions ne gèrent PAS la fenêtre : elles reçoivent un handle Python
-int engine_window_init(const EngineWindowConfig* cfg, int monitor_index);
+int engine_window_init(const EngineWindowConfig* cfg, int monitor_index = 0);
 void engine_window_run();
+bool engine_window_should_close();
+void engine_window_swap_buffers();
+void engine_window_poll_events();
 void engine_window_shutdown();
+
 void* engine_window_get_native_handle();

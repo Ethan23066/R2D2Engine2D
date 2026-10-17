@@ -2,10 +2,12 @@
 
 MeshGL3::MeshGL3() {}
 
-void MeshGL3::upload() {
+void MeshGL3::upload()
+{
     // OpenGL upload
 }
 
-void MeshGL3::draw() {
+void MeshGL3::draw()
+{
     // OpenGL draw
 }
