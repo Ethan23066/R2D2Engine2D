@@ -22,13 +22,32 @@ if(BUILD_PY_BINDINGS)
     )
     FetchContent_MakeAvailable(nanobind)
 
-    # nanobind may provide either target nanobind::nanobind or nanobind
+    # Prefer the official target if provided, otherwise create a minimal INTERFACE target
     if(TARGET nanobind::nanobind)
         set(NANOBIND_TARGET nanobind::nanobind)
+        message(STATUS "Using nanobind target: nanobind::nanobind")
     elseif(TARGET nanobind)
         set(NANOBIND_TARGET nanobind)
+        message(STATUS "Using nanobind target: nanobind")
     else()
-        message(FATAL_ERROR "nanobind target not found after FetchContent; check nanobind CMake configuration")
+        # Create an imported INTERFACE target that points to the fetched nanobind headers.
+        # This fallback is intentionally minimal: it only provides include paths so C++
+        # compilation can find <nanobind/nanobind.h>. If nanobind provides a full CMake
+        # target in the future, that will be preferred.
+        add_library(nanobind::nanobind INTERFACE IMPORTED)
+        if(DEFINED nanobind_SOURCE_DIR)
+            set_target_properties(nanobind::nanobind PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${nanobind_SOURCE_DIR}/include"
+            )
+            message(STATUS "Created fallback nanobind::nanobind INTERFACE target -> ${nanobind_SOURCE_DIR}/include")
+        else()
+            # As a last resort, try a common location relative to the source tree
+            set_target_properties(nanobind::nanobind PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/third_party/nanobind/include"
+            )
+            message(WARNING "nanobind source dir unknown — created fallback INTERFACE target pointing to ${CMAKE_SOURCE_DIR}/third_party/nanobind/include")
+        endif()
+        set(NANOBIND_TARGET nanobind::nanobind)
     endif()
 endif()
 
