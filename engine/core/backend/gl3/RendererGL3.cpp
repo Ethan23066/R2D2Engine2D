@@ -12,6 +12,15 @@ int RendererGL3::init(void* win, int w, int h)
     this->width = w;
     this->height = h;
 
+    if (!win) {
+        std::cerr << "Renderer init: null window handle\n";
+        return 0;
+    }
+
+    // Ensure the OpenGL context is current on this thread before loading GL function pointers
+    GLFWwindow* glfw_window = static_cast<GLFWwindow*>(win);
+    glfwMakeContextCurrent(glfw_window);
+
     if (!gladLoadGLLoader(
             reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         std::cerr << "Failed to load OpenGL via GLAD\n";
