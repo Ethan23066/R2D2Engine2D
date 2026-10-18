@@ -4,6 +4,7 @@ project(R2D2Engine2D LANGUAGES C CXX)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+include(GNUInstallDirs)
 
 # Python: require both Interpreter and Development so nanobind can be configured
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
