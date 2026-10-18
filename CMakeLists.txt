@@ -5,8 +5,8 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Python
-find_package(Python COMPONENTS Development REQUIRED)
+# Python: require both Interpreter and Development so nanobind can be configured
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
 # Find GLFW (pkg-config) and OpenGL
 find_package(PkgConfig REQUIRED)
