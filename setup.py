@@ -1,281 +1,114 @@
-// WARNING: This file is intentionally kept as a compatibility fallback for legacy
-// builds. The project is migrating to CMake + nanobind. Use CMake for the real
-// build path (see MIGRATION_CMAKE.md). This file is not the canonical build
-// setup anymore.
+// from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
+from pathlib import Path
+import sys
+import sysconfig
+import os
 
-from setuptools import setup, Extension
-from Cython.Build import cythonize
-from distutils.command.build_ext import build_ext
-from distutils.sysconfig import customize_compiler
-import os, sys, time, multiprocessing
-import re
+ROOT = Path(__file__).parent
 
-# -----------------------------------------------------------------------------
-# Progress bar / diagnostics
-# -----------------------------------------------------------------------------
+# Where we look for nanobind sources
+NANOBIND_SRC_DIR = ROOT / "engine" / "nanobind"
 
-def progress_bar(current, total, prefix="Compiling"):
-    bar_len = 40
-    filled = int(bar_len * current / total) if total else bar_len
-    bar = "█" * filled + "░" * (bar_len - filled)
-    sys.stdout.write(f"\r{prefix} [{bar}] {current}/{total}")
-    sys.stdout.flush()
+# Fallback include if nanobind not installed (vendor/)
+def get_nanobind_include():
+    try:
+        import nanobind
+        return nanobind.get_include()
+    except Exception:
+        fallback = ROOT / "vendor" / "nanobind" / "include"
+        return str(fallback)
 
-# -----------------------------------------------------------------------------
-# Build directories and include paths
-# -----------------------------------------------------------------------------
-MODULE_DIRS = [
-    "engine/cython/backend",
-    "engine/cython/backend/gl3",
-    "engine/cython/window",
-    "engine/cython/base",
-    "engine/cython/input",
-    "engine/cython/renderer",
+NB_INCLUDE = get_nanobind_include()
+
+# Engine include dirs (adjust if your headers live elsewhere)
+INCLUDE_DIRS = [
+    NB_INCLUDE,
+    str(ROOT),
+    str(ROOT / "engine" / "core"),
 ]
 
-CORE_DIRS = [
-    "engine/core/backend/gl3",
-    "engine/core/backend/gl3/glad",
-    "engine/core/window",
-    "engine/core/base",
-    "engine/core/inputs",
-    "engine/core/renderer",
-]
+# Compiler flags (platform-aware)
+if sys.platform == "win32":
+    CPP_FLAGS = ["/std:c++20", "/O2"]
+    LINK_ARGS = []
+else:
+    CPP_FLAGS = ["-std=c++20", "-O3", "-Wall", "-fPIC", "-march=native"]
+    LINK_ARGS = []
 
-INCLUDE_DIRS = ["."] + MODULE_DIRS + CORE_DIRS
+# Helper: discover .cpp sources under engine/nanobind and map to module names
+def discover_nanobind_extensions(src_root: Path):
+    modules = {}
+    if not src_root.exists():
+        return modules
 
-CPP_FLAGS = [
-    "-std=c++2b",
-    "-O3",
-    "-Wall",
-    "-march=x86-64",
-    "-mtune=generic",
-    "-fPIC",
-]
+    for p in sorted(src_root.rglob("*.cpp")):
+        rel = p.relative_to(ROOT)
+        # build a Python module name from path: engine/nanobind/foo/bar.cpp -> engine.nanobind.foo.bar
+        mod_name = ".".join(rel.with_suffix("").parts)
+        modules.setdefault(mod_name, []).append(str(p))
+    return modules
 
-C_FLAGS = [
-    "-std=c23",
-    "-O3",
-    "-Wall",
-    "-march=x86-64",
-    "-mtune=generic",
-    "-fPIC",
-]
-
-# -----------------------------------------------------------------------------
-# Scanner utilities (legacy only)
-# -----------------------------------------------------------------------------
-
-
-def scan_cpp_symbols():
-    """Legacy scan used to identify C++ APIs to expose to Cython."""
-    print("\n>>> Scan des symboles C++ exposés <<<\n")
-    hpp_files = []
-    for base in CORE_DIRS:
-        for root, _, files in os.walk(base):
-            for f in files:
-                if f.endswith(".hpp"):
-                    hpp_files.append(os.path.join(root, f))
-
-    exposed = {}
-    sig_re = re.compile(r"(?:int|void|bool|float|double)\s+([A-Za-z0-9_:]+)\s*\(([^)]*)\)")
-
-    for hpp in hpp_files:
-        with open(hpp, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        for match in sig_re.finditer(content):
-            func = match.group(1)
-            args = match.group(2)
-            exposed[func] = {"file": hpp, "args": args, "ref_problem": "&" in args}
-
-    print(f"Trouvé {len(exposed)} fonctions exposées.\n")
-    return exposed
-
-
-def scan_pxd_calls():
-    """Legacy scan used to map pxd declarations to native APIs."""
-    print("\n>>> Scan des appels Cython (.pxd) <<<\n")
-    pxd_files = []
-    for base in MODULE_DIRS:
-        for root, _, files in os.walk(base):
-            for f in files:
-                if f.endswith(".pxd"):
-                    pxd_files.append(os.path.join(root, f))
-
-    calls = {}
-    call_re = re.compile(r"(?:int|void|bool|float|double)\s+([A-Za-z0-9_]+)\s*\(")
-
-    for pxd in pxd_files:
-        with open(pxd, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        for match in call_re.finditer(content):
-            func = match.group(1)
-            calls.setdefault(func, []).append(pxd)
-
-    print(f"Trouvé {len(calls)} appels Cython.\n")
-    return calls
-
-
-def scan_linking(exposed, calls):
-    print("\n>>> Analyse du linkage <<<\n")
-    for func, info in exposed.items():
-        if func not in calls:
-            continue
-
-        print(f"- Fonction {func}:")
-        print(f"  - Header : {info['file']}")
-        print(f"  - Appelée dans : {calls[func]}")
-        if info["ref_problem"]:
-            print("  ⚠ Signature problématique : référence C++ détectée (const T&)")
-            print("    → convertir en pointeur T* ou ajouter un wrapper")
-        print()
-
-
-def find_pyx_files(base_dirs):
-    out = []
-    for base in base_dirs:
-        for root, _, files in os.walk(base):
-            for f in files:
-                if f.endswith(".pyx"):
-                    out.append(os.path.join(root, f))
-    return out
-
-
-def collect_core_cpp_for_module(pyx_path):
-    """Legacy mapping: associate each Cython module to native engine sources."""
-    parts = pyx_path.replace("\\", "/").split("/")
-
-    if "backend" in parts and "gl3" in parts:
-        return [
-            "engine/core/backend/gl3/MeshGL3.cpp",
-            "engine/core/backend/gl3/RendererGL3.cpp",
-            "engine/core/backend/gl3/ShaderGL3.cpp",
-            "engine/core/backend/gl3/Texture.cpp",
-        ]
-
-    if "window" in parts:
-        return ["engine/core/window/window.cpp"]
-
-    if "base" in parts:
-        return [
-            "engine/core/base/config.cpp",
-            "engine/core/base/events.cpp",
-            "engine/core/base/lifecycle.cpp",
-            "engine/core/base/log.cpp",
-            "engine/core/base/system.cpp",
-            "engine/core/base/time.cpp",
-        ]
-
-    if "input" in parts:
-        return ["engine/core/inputs/input.cpp"]
-
-    if "renderer" in parts:
-        return []
-
-    return []
-
-# -----------------------------------------------------------------------------
-# Legacy build class
-# -----------------------------------------------------------------------------
-
-
-class BuildWithGlad(build_ext):
+# Build class: single-threaded, optional precompile of glad.c
+class BuildNoParallel(build_ext):
     def build_extensions(self):
-        try:
-            self.parallel = multiprocessing.cpu_count()
-        except Exception:
-            self.parallel = 4
+        # force single-threaded builds (no multiprocessing)
+        self.parallel = 1
 
-        customize_compiler(self.compiler)
-        self.mkpath(self.build_temp)
-
-        total = len(self.extensions)
-        current = 0
-
-        GLAD_C = "engine/core/backend/gl3/glad/glad.c"
+        # try to precompile glad.c if present (keeps legacy optimisation)
+        glad_c = ROOT / "engine" / "core" / "backend" / "gl3" / "glad" / "glad.c"
         glad_obj = None
-        if os.path.exists(GLAD_C):
-            try:
+        try:
+            if glad_c.exists():
                 objs = self.compiler.compile(
-                    [GLAD_C],
+                    [str(glad_c)],
                     output_dir=self.build_temp,
                     include_dirs=INCLUDE_DIRS,
-                    extra_postargs=C_FLAGS,
+                    extra_postargs=[flag for flag in (CPP_FLAGS if self.compiler.compiler_type != "msvc" else [])],
                 )
                 if objs:
                     glad_obj = objs[0]
+                    # print status
                     print(f"\nPrecompiled glad: {glad_obj}")
-            except Exception as e:
-                print("\nWarning: failed to precompile glad.c:", e)
+        except Exception as e:
+            print("Warning: failed to precompile glad.c:", e)
 
-        print(f"\n>>> R2D2Engine2D — Compilation (threads = {self.parallel}) <<<\n")
-
+        # attach glad object to extensions that request it
         for ext in self.extensions:
-            current += 1
-            progress_bar(current, total, prefix=f"Building {ext.name}")
-
             if getattr(ext, "needs_glad", False) and glad_obj:
-                if not getattr(ext, "extra_objects", None):
-                    ext.extra_objects = []
-                if glad_obj not in ext.extra_objects:
-                    ext.extra_objects.append(glad_obj)
+                extra = list(getattr(ext, "extra_objects", []) or [])
+                if glad_obj not in extra:
+                    extra.append(glad_obj)
+                ext.extra_objects = extra
 
-            super().build_extension(ext)
-            time.sleep(0.02)
+        super().build_extensions()
 
-        print("\n\n>>> Compilation terminée ! <<<\n")
-
-# -----------------------------------------------------------------------------
-# Legacy build list
-# -----------------------------------------------------------------------------
-
-exposed = scan_cpp_symbols()
-calls = scan_pxd_calls()
-scan_linking(exposed, calls)
-
+# Create Extension objects
 extensions = []
-pyx_files = find_pyx_files(MODULE_DIRS)
-for pyx in pyx_files:
-    module_name = pyx.replace("/", ".").replace(".pyx", "")
-    sources = [pyx]
-    core_cpp = collect_core_cpp_for_module(pyx)
-    sources += core_cpp
-
-    seen = set()
-    deduped = []
-    for s in sources:
-        if s not in seen:
-            seen.add(s)
-            deduped.append(s)
-    sources = deduped
-
-    libs = ["GL"]
-    if "window" in pyx:
-        libs.append("glfw")
-
+mod_map = discover_nanobind_extensions(NANOBIND_SRC_DIR)
+for mod_name, sources in mod_map.items():
     ext = Extension(
-        module_name,
+        mod_name,
         sources=sources,
-        include_dirs=INCLUDE_DIRS,
-        extra_compile_args=CPP_FLAGS,
+        include_dirs=INCLUDE_DIRS + [sysconfig.get_paths()["include"]],
         language="c++",
-        libraries=libs,
+        extra_compile_args=CPP_FLAGS,
+        extra_link_args=LINK_ARGS,
     )
-
-    if "backend/gl3" in pyx or "/gl3/" in pyx:
+    # convention: modules under engine/core/backend/gl3 need glad
+    if "engine.core.backend.gl3" in mod_name or "/gl3/" in " ".join(sources):
         ext.needs_glad = True
     else:
         ext.needs_glad = False
-
     extensions.append(ext)
 
-extensions = cythonize(extensions, language_level=3, annotate=False)
+# If nothing found, keep an empty installable package (no build error).
+if not extensions:
+    print("No nanobind extensions found under engine/nanobind; setup will install package metadata only.")
 
 setup(
     name="R2D2Engine2D",
-    version="1.0",
+    version="1.0.0",
     ext_modules=extensions,
-    cmdclass={"build_ext": BuildWithGlad},
+    cmdclass={"build_ext": BuildNoParallel},
 )
