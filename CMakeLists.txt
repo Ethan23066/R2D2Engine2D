@@ -16,13 +16,12 @@ if(BUILD_PY_BINDINGS)
 
     include(FetchContent)
     FetchContent_Declare(
-      nanobind
-      GIT_REPOSITORY https://github.com/wjakob/nanobind
-      GIT_TAG        master
+            nanobind
+            GIT_REPOSITORY https://github.com/wjakob/nanobind
+            GIT_TAG        master
     )
     FetchContent_MakeAvailable(nanobind)
 
-    # Prefer the official target if provided, otherwise create a minimal INTERFACE target
     if(TARGET nanobind::nanobind)
         set(NANOBIND_TARGET nanobind::nanobind)
         message(STATUS "Using nanobind target: nanobind::nanobind")
@@ -30,20 +29,15 @@ if(BUILD_PY_BINDINGS)
         set(NANOBIND_TARGET nanobind)
         message(STATUS "Using nanobind target: nanobind")
     else()
-        # Create an imported INTERFACE target that points to the fetched nanobind headers.
-        # This fallback is intentionally minimal: it only provides include paths so C++
-        # compilation can find <nanobind/nanobind.h>. If nanobind provides a full CMake
-        # target in the future, that will be preferred.
         add_library(nanobind::nanobind INTERFACE IMPORTED)
         if(DEFINED nanobind_SOURCE_DIR)
             set_target_properties(nanobind::nanobind PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES "${nanobind_SOURCE_DIR}/include"
+                    INTERFACE_INCLUDE_DIRECTORIES "${nanobind_SOURCE_DIR}/include"
             )
             message(STATUS "Created fallback nanobind::nanobind INTERFACE target -> ${nanobind_SOURCE_DIR}/include")
         else()
-            # As a last resort, try a common location relative to the source tree
             set_target_properties(nanobind::nanobind PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/third_party/nanobind/include"
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/third_party/nanobind/include"
             )
             message(WARNING "nanobind source dir unknown — created fallback INTERFACE target pointing to ${CMAKE_SOURCE_DIR}/third_party/nanobind/include")
         endif()
@@ -58,26 +52,26 @@ find_package(OpenGL REQUIRED)
 
 # Collect engine sources (explicitly include glad.c as C source)
 file(GLOB_RECURSE ENGINE_CPP_SRCS CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/engine/core/*.cpp"
+        "${CMAKE_SOURCE_DIR}/engine/core/*.cpp"
 )
 file(GLOB_RECURSE ENGINE_C_SRCS CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/engine/core/*.c"
+        "${CMAKE_SOURCE_DIR}/engine/core/*.c"
 )
 list(APPEND ENGINE_C_SRCS "${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad/glad.c")
 
 if(BUILD_PY_BINDINGS)
     add_library(_r2d2 MODULE
-        bindings/bindings.cpp
-        ${ENGINE_CPP_SRCS}
-        ${ENGINE_C_SRCS}
+            bindings/bindings.cpp
+            ${ENGINE_CPP_SRCS}
+            ${ENGINE_C_SRCS}
     )
 
     set(R2D2_PUBLIC_INCLUDES
-        ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/engine/core
-        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3
-        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
-        ${GLFW_INCLUDEDIR}
+            ${CMAKE_SOURCE_DIR}
+            ${CMAKE_SOURCE_DIR}/engine/core
+            ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3
+            ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
+            ${GLFW_INCLUDEDIR}
     )
 
     if(DEFINED nanobind_SOURCE_DIR)
@@ -85,33 +79,32 @@ if(BUILD_PY_BINDINGS)
     endif()
 
     target_include_directories(_r2d2 PRIVATE ${R2D2_PUBLIC_INCLUDES})
-
     target_compile_features(_r2d2 PRIVATE cxx_std_23)
-
-    # Link libraries: nanobind, Python, GLFW, OpenGL
     target_link_libraries(_r2d2 PRIVATE ${NANOBIND_TARGET} Python::Python ${GLFW_LIBRARIES} OpenGL::GL)
-
-    # Ensure Python can import the extension as r2d2._r2d2
     set_target_properties(_r2d2 PROPERTIES PREFIX "")
 
-    # Install rule (optional) - place in Python package layout if using install
     install(TARGETS _r2d2
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if(BUILD_DEMO)
-    add_executable(r2d2_demo
-        ${CMAKE_SOURCE_DIR}/examples/demo/main.cpp
-        ${ENGINE_CPP_SRCS}
-        ${ENGINE_C_SRCS}
-    )
-    target_include_directories(r2d2_demo PRIVATE
-        ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/engine/core
-        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3
-        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
-        ${GLFW_INCLUDEDIR}
-    )
-    target_compile_features(r2d2_demo PRIVATE cxx_std_23)
-    target_link_libraries(r2d2_demo PRIVATE ${GLFW_LIBRARIES} OpenGL::GL)
+    set(DEMO_MAIN "${CMAKE_SOURCE_DIR}/examples/demo/main.cpp")
+    if(EXISTS "${DEMO_MAIN}")
+        add_executable(r2d2_demo
+                "${DEMO_MAIN}"
+                ${ENGINE_CPP_SRCS}
+                ${ENGINE_C_SRCS}
+        )
+        target_include_directories(r2d2_demo PRIVATE
+                ${CMAKE_SOURCE_DIR}
+                ${CMAKE_SOURCE_DIR}/engine/core
+                ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3
+                ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
+                ${GLFW_INCLUDEDIR}
+        )
+        target_compile_features(r2d2_demo PRIVATE cxx_std_23)
+        target_link_libraries(r2d2_demo PRIVATE ${GLFW_LIBRARIES} OpenGL::GL)
+    else()
+        message(WARNING "BUILD_DEMO enabled but examples/demo/main.cpp not found — skipping demo target")
+    endif()
 endif()
