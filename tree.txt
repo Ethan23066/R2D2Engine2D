@@ -1,43 +1,796 @@
 .
+├── bindings
+│   ├── bindings.cpp
+│   └── README_BINDINGS.md
 ├── build
-│   └── temp.linux-x86_64-cpython-314
-│       └── engine
-│           ├── core
-│           │   ├── backend
-│           │   │   └── gl3
-│           │   │       ├── glad
-│           │   │       │   └── glad.o
-│           │   │       ├── MeshGL3.o
-│           │   │       ├── RendererGL3.o
-│           │   │       ├── ShaderGL3.o
-│           │   │       └── Texture.o
-│           │   ├── base
-│           │   │   ├── config.o
-│           │   │   ├── events.o
-│           │   │   ├── lifecycle.o
-│           │   │   ├── log.o
-│           │   │   ├── system.o
-│           │   │   └── time.o
-│           │   ├── inputs
-│           │   │   └── input.o
-│           │   └── window
-│           │       └── window.o
-│           └── cython
-│               ├── backend
-│               │   ├── gl3
-│               │   │   └── gl3.o
-│               │   └── manager.o
-│               ├── base
-│               │   ├── config.o
-│               │   ├── events.o
-│               │   ├── lifecycle.o
-│               │   ├── log.o
-│               │   ├── system.o
-│               │   └── time.o
-│               ├── input
-│               │   └── input.o
-│               └── window
-│                   └── window.o
+│   ├── CMakeCache.txt
+│   ├── CMakeFiles
+│   │   ├── 3.31.6
+│   │   │   ├── CMakeCCompiler.cmake
+│   │   │   ├── CMakeCXXCompiler.cmake
+│   │   │   ├── CMakeDetermineCompilerABI_C.bin
+│   │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+│   │   │   ├── CMakeSystem.cmake
+│   │   │   ├── CompilerIdC
+│   │   │   │   ├── a.out
+│   │   │   │   ├── CMakeCCompilerId.c
+│   │   │   │   └── tmp
+│   │   │   └── CompilerIdCXX
+│   │   │       ├── a.out
+│   │   │       ├── CMakeCXXCompilerId.cpp
+│   │   │       └── tmp
+│   │   ├── cmake.check_cache
+│   │   ├── CMakeConfigureLog.yaml
+│   │   ├── CMakeDirectoryInformation.cmake
+│   │   ├── CMakeScratch
+│   │   ├── cmake.verify_globs
+│   │   ├── Makefile2
+│   │   ├── Makefile.cmake
+│   │   ├── pkgRedirects
+│   │   ├── Progress
+│   │   │   ├── 1
+│   │   │   ├── 10
+│   │   │   ├── 11
+│   │   │   ├── 12
+│   │   │   ├── 13
+│   │   │   ├── 14
+│   │   │   ├── 2
+│   │   │   ├── 3
+│   │   │   ├── 4
+│   │   │   ├── 5
+│   │   │   ├── 6
+│   │   │   ├── 7
+│   │   │   ├── 8
+│   │   │   ├── 9
+│   │   │   └── count.txt
+│   │   ├── progress.marks
+│   │   ├── _r2d2.dir
+│   │   │   ├── bindings
+│   │   │   ├── build.make
+│   │   │   ├── cmake_clean.cmake
+│   │   │   ├── compiler_depend.make
+│   │   │   ├── compiler_depend.ts
+│   │   │   ├── DependInfo.cmake
+│   │   │   ├── depend.make
+│   │   │   ├── engine
+│   │   │   │   └── core
+│   │   │   │       ├── backend
+│   │   │   │       │   └── gl3
+│   │   │   │       │       ├── glad
+│   │   │   │       │       │   ├── glad.c.o
+│   │   │   │       │       │   └── glad.c.o.d
+│   │   │   │       │       ├── MeshGL3.cpp.o
+│   │   │   │       │       ├── MeshGL3.cpp.o.d
+│   │   │   │       │       ├── RendererGL3.cpp.o
+│   │   │   │       │       ├── RendererGL3.cpp.o.d
+│   │   │   │       │       ├── ShaderGL3.cpp.o
+│   │   │   │       │       ├── ShaderGL3.cpp.o.d
+│   │   │   │       │       ├── Texture.cpp.o
+│   │   │   │       │       └── Texture.cpp.o.d
+│   │   │   │       ├── base
+│   │   │   │       │   ├── config.cpp.o
+│   │   │   │       │   ├── config.cpp.o.d
+│   │   │   │       │   ├── events.cpp.o
+│   │   │   │       │   ├── events.cpp.o.d
+│   │   │   │       │   ├── lifecycle.cpp.o
+│   │   │   │       │   ├── lifecycle.cpp.o.d
+│   │   │   │       │   ├── log.cpp.o
+│   │   │   │       │   ├── log.cpp.o.d
+│   │   │   │       │   ├── system.cpp.o
+│   │   │   │       │   ├── system.cpp.o.d
+│   │   │   │       │   ├── time.cpp.o
+│   │   │   │       │   └── time.cpp.o.d
+│   │   │   │       └── window
+│   │   │   │           ├── glfw_raii.cpp.o
+│   │   │   │           ├── glfw_raii.cpp.o.d
+│   │   │   │           ├── window.cpp.o
+│   │   │   │           └── window.cpp.o.d
+│   │   │   ├── flags.make
+│   │   │   ├── link.txt
+│   │   │   └── progress.make
+│   │   ├── TargetDirectories.txt
+│   │   └── VerifyGlobs.cmake
+│   ├── cmake_install.cmake
+│   ├── _deps
+│   │   ├── nanobind-build
+│   │   │   ├── CMakeFiles
+│   │   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   │   └── progress.marks
+│   │   │   ├── cmake_install.cmake
+│   │   │   └── Makefile
+│   │   ├── nanobind-src
+│   │   │   ├── cmake
+│   │   │   │   ├── collect-symbols.py
+│   │   │   │   ├── collect-symbols-pypy.py
+│   │   │   │   ├── darwin-ld-cpython.sym
+│   │   │   │   ├── darwin-ld-pypy.sym
+│   │   │   │   ├── darwin-python-path.py
+│   │   │   │   └── nanobind-config.cmake
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── docs
+│   │   │   │   ├── api_cmake.rst
+│   │   │   │   ├── api_core.rst
+│   │   │   │   ├── api_extra.rst
+│   │   │   │   ├── basics.rst
+│   │   │   │   ├── bazel.rst
+│   │   │   │   ├── benchmark.rst
+│   │   │   │   ├── building.rst
+│   │   │   │   ├── changelog.rst
+│   │   │   │   ├── classes.rst
+│   │   │   │   ├── conf.py
+│   │   │   │   ├── cppyy.h
+│   │   │   │   ├── eigen.rst
+│   │   │   │   ├── exceptions.rst
+│   │   │   │   ├── exchanging.rst
+│   │   │   │   ├── faq.rst
+│   │   │   │   ├── free_threaded.rst
+│   │   │   │   ├── functions.rst
+│   │   │   │   ├── images
+│   │   │   │   │   ├── binding-dark.svg
+│   │   │   │   │   ├── binding-light.svg
+│   │   │   │   │   ├── caster-dark.svg
+│   │   │   │   │   ├── caster-light.svg
+│   │   │   │   │   ├── logo.jpg
+│   │   │   │   │   ├── perf.svg
+│   │   │   │   │   ├── sizes.svg
+│   │   │   │   │   ├── split-dark.svg
+│   │   │   │   │   ├── split-light.svg
+│   │   │   │   │   ├── times.svg
+│   │   │   │   │   ├── wrapper-dark.svg
+│   │   │   │   │   └── wrapper-light.svg
+│   │   │   │   ├── index.rst
+│   │   │   │   ├── installing.rst
+│   │   │   │   ├── lowlevel.rst
+│   │   │   │   ├── meson.rst
+│   │   │   │   ├── microbenchmark.ipynb
+│   │   │   │   ├── ndarray_index.rst
+│   │   │   │   ├── ndarray.rst
+│   │   │   │   ├── normalize_changelog_links.py
+│   │   │   │   ├── ownership_adv.rst
+│   │   │   │   ├── ownership.rst
+│   │   │   │   ├── packaging.rst
+│   │   │   │   ├── porting.rst
+│   │   │   │   ├── pypy.rst
+│   │   │   │   ├── refleaks.rst
+│   │   │   │   ├── release.rst
+│   │   │   │   ├── requirements.txt
+│   │   │   │   ├── split_mode.rst
+│   │   │   │   ├── typing.rst
+│   │   │   │   ├── utilities.rst
+│   │   │   │   └── why.rst
+│   │   │   ├── ext
+│   │   │   │   └── robin_map
+│   │   │   │       ├── cmake
+│   │   │   │       │   └── tsl-robin-mapConfig.cmake.in
+│   │   │   │       ├── CMakeLists.txt
+│   │   │   │       ├── doxygen.conf
+│   │   │   │       ├── include
+│   │   │   │       │   └── tsl
+│   │   │   │       │       ├── robin_growth_policy.h
+│   │   │   │       │       ├── robin_hash.h
+│   │   │   │       │       ├── robin_map.h
+│   │   │   │       │       └── robin_set.h
+│   │   │   │       ├── LICENSE
+│   │   │   │       ├── README.md
+│   │   │   │       ├── tests
+│   │   │   │       │   ├── CMakeLists.txt
+│   │   │   │       │   ├── custom_allocator_tests.cpp
+│   │   │   │       │   ├── main.cpp
+│   │   │   │       │   ├── policy_tests.cpp
+│   │   │   │       │   ├── robin_map_tests.cpp
+│   │   │   │       │   ├── robin_set_tests.cpp
+│   │   │   │       │   └── utils.h
+│   │   │   │       └── tsl-robin-map.natvis
+│   │   │   ├── include
+│   │   │   │   └── nanobind
+│   │   │   │       ├── eigen
+│   │   │   │       │   ├── dense.h
+│   │   │   │       │   ├── sparse.h
+│   │   │   │       │   └── tensor.h
+│   │   │   │       ├── eval.h
+│   │   │   │       ├── intrusive
+│   │   │   │       │   ├── counter.h
+│   │   │   │       │   ├── counter.inl
+│   │   │   │       │   └── ref.h
+│   │   │   │       ├── make_iterator.h
+│   │   │   │       ├── nanobind.h
+│   │   │   │       ├── nb_accessor.h
+│   │   │   │       ├── nb_attr.h
+│   │   │   │       ├── nb_backend.h
+│   │   │   │       ├── nb_backend_slots.h
+│   │   │   │       ├── nb_call.h
+│   │   │   │       ├── nb_cast.h
+│   │   │   │       ├── nb_class.h
+│   │   │   │       ├── nb_defs.h
+│   │   │   │       ├── nb_descr.h
+│   │   │   │       ├── nb_error.h
+│   │   │   │       ├── nb_func.h
+│   │   │   │       ├── nb_misc.h
+│   │   │   │       ├── nb_platform.h
+│   │   │   │       ├── nb_python.h
+│   │   │   │       ├── nb_traits.h
+│   │   │   │       ├── nb_tuple.h
+│   │   │   │       ├── nb_types.h
+│   │   │   │       ├── ndarray.h
+│   │   │   │       ├── operators.h
+│   │   │   │       ├── stl
+│   │   │   │       │   ├── array.h
+│   │   │   │       │   ├── bind_map.h
+│   │   │   │       │   ├── bind_vector.h
+│   │   │   │       │   ├── chrono.h
+│   │   │   │       │   ├── complex.h
+│   │   │   │       │   ├── detail
+│   │   │   │       │   │   ├── nb_array.h
+│   │   │   │       │   │   ├── nb_dict.h
+│   │   │   │       │   │   ├── nb_list.h
+│   │   │   │       │   │   ├── nb_optional.h
+│   │   │   │       │   │   ├── nb_set.h
+│   │   │   │       │   │   └── traits.h
+│   │   │   │       │   ├── filesystem.h
+│   │   │   │       │   ├── function.h
+│   │   │   │       │   ├── list.h
+│   │   │   │       │   ├── map.h
+│   │   │   │       │   ├── optional.h
+│   │   │   │       │   ├── pair.h
+│   │   │   │       │   ├── set.h
+│   │   │   │       │   ├── shared_ptr.h
+│   │   │   │       │   ├── string.h
+│   │   │   │       │   ├── string_view.h
+│   │   │   │       │   ├── tuple.h
+│   │   │   │       │   ├── unique_ptr.h
+│   │   │   │       │   ├── unordered_map.h
+│   │   │   │       │   ├── unordered_set.h
+│   │   │   │       │   ├── variant.h
+│   │   │   │       │   ├── vector.h
+│   │   │   │       │   └── wstring.h
+│   │   │   │       ├── trampoline.h
+│   │   │   │       └── typing.h
+│   │   │   ├── LICENSE
+│   │   │   ├── nanobind-backend
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── pyproject.toml
+│   │   │   │   ├── README.md
+│   │   │   │   └── src
+│   │   │   │       └── nanobind_backend
+│   │   │   │           └── __init__.py
+│   │   │   ├── pyproject.toml
+│   │   │   ├── README.md
+│   │   │   ├── src
+│   │   │   │   ├── buffer.h
+│   │   │   │   ├── common.cpp
+│   │   │   │   ├── error.cpp
+│   │   │   │   ├── hash.h
+│   │   │   │   ├── implicit.cpp
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __main__.py
+│   │   │   │   ├── nb_backend.cpp
+│   │   │   │   ├── nb_combined.cpp
+│   │   │   │   ├── nb_datetime.cpp
+│   │   │   │   ├── nb_enum.cpp
+│   │   │   │   ├── nb_ft.cpp
+│   │   │   │   ├── nb_ft.h
+│   │   │   │   ├── nb_func.cpp
+│   │   │   │   ├── nb_internals.cpp
+│   │   │   │   ├── nb_internals.h
+│   │   │   │   ├── nb_ndarray.cpp
+│   │   │   │   ├── nb_static_property.cpp
+│   │   │   │   ├── nb_type.cpp
+│   │   │   │   ├── stubgen.py
+│   │   │   │   ├── trampoline.cpp
+│   │   │   │   └── version.py
+│   │   │   └── tests
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── common.py
+│   │   │       ├── conftest.py
+│   │   │       ├── inter_module.cpp
+│   │   │       ├── inter_module.h
+│   │   │       ├── object_py.h
+│   │   │       ├── pattern_file.nb
+│   │   │       ├── pattern_file_recursive.nb
+│   │   │       ├── py_recursive_stub_test
+│   │   │       │   ├── alias.py
+│   │   │       │   ├── alias.pyi.ref
+│   │   │       │   ├── bar.py
+│   │   │       │   ├── bar.pyi.ref
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── __init__.pyi.ref
+│   │   │       │   └── sub
+│   │   │       │       ├── __init__.py
+│   │   │       │       ├── __init__.pyi.ref
+│   │   │       │       ├── mod.py
+│   │   │       │       └── mod.pyi.ref
+│   │   │       ├── py_stub_test.py
+│   │   │       ├── py_stub_test.pyi.ref
+│   │   │       ├── test_abi_layout.cpp
+│   │   │       ├── test_abi_missing.cpp
+│   │   │       ├── test_abi_multi_1.cpp
+│   │   │       ├── test_abi_multi_2.cpp
+│   │   │       ├── test_abi_multi.h
+│   │   │       ├── test_abi.py
+│   │   │       ├── test_accessor.cpp
+│   │   │       ├── test_accessor.py
+│   │   │       ├── test_callbacks.cpp
+│   │   │       ├── test_callbacks.py
+│   │   │       ├── test_chrono.cpp
+│   │   │       ├── test_chrono.py
+│   │   │       ├── test_classes.cpp
+│   │   │       ├── test_classes_ext.pyi.ref
+│   │   │       ├── test_classes_extra.cpp
+│   │   │       ├── test_classes.h
+│   │   │       ├── test_classes.py
+│   │   │       ├── test_eigen.cpp
+│   │   │       ├── test_eigen.py
+│   │   │       ├── test_eigen_tensor.cpp
+│   │   │       ├── test_eigen_tensor.py
+│   │   │       ├── test_enum.cpp
+│   │   │       ├── test_enum_ext.pyi.ref
+│   │   │       ├── test_enum.py
+│   │   │       ├── test_eval.cpp
+│   │   │       ├── test_eval.py
+│   │   │       ├── test_exception.cpp
+│   │   │       ├── test_exception.py
+│   │   │       ├── test_foreign.cpp
+│   │   │       ├── test_foreign.py
+│   │   │       ├── test_functions.cpp
+│   │   │       ├── test_functions_ext.pyi.ref
+│   │   │       ├── test_functions.py
+│   │   │       ├── test_holders.cpp
+│   │   │       ├── test_holders.py
+│   │   │       ├── test_inter_module_1.cpp
+│   │   │       ├── test_inter_module_2.cpp
+│   │   │       ├── test_inter_module.py
+│   │   │       ├── test_intrusive.cpp
+│   │   │       ├── test_intrusive_impl.cpp
+│   │   │       ├── test_intrusive.py
+│   │   │       ├── test_issue.cpp
+│   │   │       ├── test_issue.py
+│   │   │       ├── test_jax.cpp
+│   │   │       ├── test_jax_ext.pyi.ref
+│   │   │       ├── test_jax.py
+│   │   │       ├── test_make_iterator.cpp
+│   │   │       ├── test_make_iterator_ext.pyi.ref
+│   │   │       ├── test_make_iterator.py
+│   │   │       ├── test_ndarray.cpp
+│   │   │       ├── test_ndarray_ext.pyi.ref
+│   │   │       ├── test_ndarray.py
+│   │   │       ├── test_prefix_module
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── __init__.pyi.ref
+│   │   │       │   ├── prefixabc.py
+│   │   │       │   ├── prefixabc.pyi.ref
+│   │   │       │   ├── prefix.py
+│   │   │       │   └── prefix.pyi.ref
+│   │   │       ├── test_specialization.py
+│   │   │       ├── test_stl_bind_map.cpp
+│   │   │       ├── test_stl_bind_map.py
+│   │   │       ├── test_stl_bind_vector.cpp
+│   │   │       ├── test_stl_bind_vector.py
+│   │   │       ├── test_stl.cpp
+│   │   │       ├── test_stl_ext.pyi.ref
+│   │   │       ├── test_stl.py
+│   │   │       ├── test_stubgen.py
+│   │   │       ├── test_stubs.py
+│   │   │       ├── test_tensorflow.cpp
+│   │   │       ├── test_tensorflow_ext.pyi.ref
+│   │   │       ├── test_tensorflow.py
+│   │   │       ├── test_thread.cpp
+│   │   │       ├── test_thread.py
+│   │   │       ├── test_typing.cpp
+│   │   │       ├── test_typing_ext.pyi.ref
+│   │   │       └── test_typing.py
+│   │   └── nanobind-subbuild
+│   │       ├── CMakeCache.txt
+│   │       ├── CMakeFiles
+│   │       │   ├── 3.31.6
+│   │       │   │   └── CMakeSystem.cmake
+│   │       │   ├── cmake.check_cache
+│   │       │   ├── CMakeConfigureLog.yaml
+│   │       │   ├── CMakeDirectoryInformation.cmake
+│   │       │   ├── CMakeRuleHashes.txt
+│   │       │   ├── Makefile2
+│   │       │   ├── Makefile.cmake
+│   │       │   ├── nanobind-populate-complete
+│   │       │   ├── nanobind-populate.dir
+│   │       │   │   ├── build.make
+│   │       │   │   ├── cmake_clean.cmake
+│   │       │   │   ├── compiler_depend.make
+│   │       │   │   ├── compiler_depend.ts
+│   │       │   │   ├── DependInfo.cmake
+│   │       │   │   ├── Labels.json
+│   │       │   │   ├── Labels.txt
+│   │       │   │   └── progress.make
+│   │       │   ├── pkgRedirects
+│   │       │   ├── progress.marks
+│   │       │   └── TargetDirectories.txt
+│   │       ├── cmake_install.cmake
+│   │       ├── CMakeLists.txt
+│   │       ├── Makefile
+│   │       └── nanobind-populate-prefix
+│   │           ├── src
+│   │           │   └── nanobind-populate-stamp
+│   │           │       ├── nanobind-populate-build
+│   │           │       ├── nanobind-populate-configure
+│   │           │       ├── nanobind-populate-done
+│   │           │       ├── nanobind-populate-download
+│   │           │       ├── nanobind-populate-gitclone-lastrun.txt
+│   │           │       ├── nanobind-populate-gitinfo.txt
+│   │           │       ├── nanobind-populate-install
+│   │           │       ├── nanobind-populate-mkdir
+│   │           │       ├── nanobind-populate-patch
+│   │           │       ├── nanobind-populate-patch-info.txt
+│   │           │       ├── nanobind-populate-test
+│   │           │       └── nanobind-populate-update-info.txt
+│   │           └── tmp
+│   │               ├── nanobind-populate-cfgcmd.txt
+│   │               ├── nanobind-populate-gitclone.cmake
+│   │               ├── nanobind-populate-gitupdate.cmake
+│   │               └── nanobind-populate-mkdirs.cmake
+│   └── Makefile
+├── cmake-build-debug
+│   ├── CMakeCache.txt
+│   ├── CMakeFiles
+│   │   ├── 4.3.1
+│   │   │   ├── CMakeCCompiler.cmake
+│   │   │   ├── CMakeCXXCompiler.cmake
+│   │   │   ├── CMakeDetermineCompilerABI_C.bin
+│   │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+│   │   │   ├── CMakeSystem.cmake
+│   │   │   ├── CompilerIdC
+│   │   │   │   ├── a.out
+│   │   │   │   ├── CMakeCCompilerId.c
+│   │   │   │   └── tmp
+│   │   │   └── CompilerIdCXX
+│   │   │       ├── a.out
+│   │   │       ├── CMakeCXXCompilerId.cpp
+│   │   │       └── tmp
+│   │   ├── clion-Debug-log.txt
+│   │   ├── clion-environment.txt
+│   │   ├── cmake.check_cache
+│   │   ├── CMakeConfigureLog.yaml
+│   │   └── pkgRedirects
+│   ├── cmake_install.cmake
+│   ├── compile_commands.json
+│   ├── _deps
+│   │   ├── nanobind-build
+│   │   │   ├── CMakeFiles
+│   │   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   │   └── progress.marks
+│   │   │   ├── cmake_install.cmake
+│   │   │   └── Makefile
+│   │   ├── nanobind-src
+│   │   │   ├── cmake
+│   │   │   │   ├── collect-symbols.py
+│   │   │   │   ├── collect-symbols-pypy.py
+│   │   │   │   ├── darwin-ld-cpython.sym
+│   │   │   │   ├── darwin-ld-pypy.sym
+│   │   │   │   ├── darwin-python-path.py
+│   │   │   │   └── nanobind-config.cmake
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── docs
+│   │   │   │   ├── api_cmake.rst
+│   │   │   │   ├── api_core.rst
+│   │   │   │   ├── api_extra.rst
+│   │   │   │   ├── basics.rst
+│   │   │   │   ├── bazel.rst
+│   │   │   │   ├── benchmark.rst
+│   │   │   │   ├── building.rst
+│   │   │   │   ├── changelog.rst
+│   │   │   │   ├── classes.rst
+│   │   │   │   ├── conf.py
+│   │   │   │   ├── cppyy.h
+│   │   │   │   ├── eigen.rst
+│   │   │   │   ├── exceptions.rst
+│   │   │   │   ├── exchanging.rst
+│   │   │   │   ├── faq.rst
+│   │   │   │   ├── free_threaded.rst
+│   │   │   │   ├── functions.rst
+│   │   │   │   ├── images
+│   │   │   │   │   ├── binding-dark.svg
+│   │   │   │   │   ├── binding-light.svg
+│   │   │   │   │   ├── caster-dark.svg
+│   │   │   │   │   ├── caster-light.svg
+│   │   │   │   │   ├── logo.jpg
+│   │   │   │   │   ├── perf.svg
+│   │   │   │   │   ├── sizes.svg
+│   │   │   │   │   ├── split-dark.svg
+│   │   │   │   │   ├── split-light.svg
+│   │   │   │   │   ├── times.svg
+│   │   │   │   │   ├── wrapper-dark.svg
+│   │   │   │   │   └── wrapper-light.svg
+│   │   │   │   ├── index.rst
+│   │   │   │   ├── installing.rst
+│   │   │   │   ├── lowlevel.rst
+│   │   │   │   ├── meson.rst
+│   │   │   │   ├── microbenchmark.ipynb
+│   │   │   │   ├── ndarray_index.rst
+│   │   │   │   ├── ndarray.rst
+│   │   │   │   ├── normalize_changelog_links.py
+│   │   │   │   ├── ownership_adv.rst
+│   │   │   │   ├── ownership.rst
+│   │   │   │   ├── packaging.rst
+│   │   │   │   ├── porting.rst
+│   │   │   │   ├── pypy.rst
+│   │   │   │   ├── refleaks.rst
+│   │   │   │   ├── release.rst
+│   │   │   │   ├── requirements.txt
+│   │   │   │   ├── split_mode.rst
+│   │   │   │   ├── typing.rst
+│   │   │   │   ├── utilities.rst
+│   │   │   │   └── why.rst
+│   │   │   ├── ext
+│   │   │   │   └── robin_map
+│   │   │   │       ├── cmake
+│   │   │   │       │   └── tsl-robin-mapConfig.cmake.in
+│   │   │   │       ├── CMakeLists.txt
+│   │   │   │       ├── doxygen.conf
+│   │   │   │       ├── include
+│   │   │   │       │   └── tsl
+│   │   │   │       │       ├── robin_growth_policy.h
+│   │   │   │       │       ├── robin_hash.h
+│   │   │   │       │       ├── robin_map.h
+│   │   │   │       │       └── robin_set.h
+│   │   │   │       ├── LICENSE
+│   │   │   │       ├── README.md
+│   │   │   │       ├── tests
+│   │   │   │       │   ├── CMakeLists.txt
+│   │   │   │       │   ├── custom_allocator_tests.cpp
+│   │   │   │       │   ├── main.cpp
+│   │   │   │       │   ├── policy_tests.cpp
+│   │   │   │       │   ├── robin_map_tests.cpp
+│   │   │   │       │   ├── robin_set_tests.cpp
+│   │   │   │       │   └── utils.h
+│   │   │   │       └── tsl-robin-map.natvis
+│   │   │   ├── include
+│   │   │   │   └── nanobind
+│   │   │   │       ├── eigen
+│   │   │   │       │   ├── dense.h
+│   │   │   │       │   ├── sparse.h
+│   │   │   │       │   └── tensor.h
+│   │   │   │       ├── eval.h
+│   │   │   │       ├── intrusive
+│   │   │   │       │   ├── counter.h
+│   │   │   │       │   ├── counter.inl
+│   │   │   │       │   └── ref.h
+│   │   │   │       ├── make_iterator.h
+│   │   │   │       ├── nanobind.h
+│   │   │   │       ├── nb_accessor.h
+│   │   │   │       ├── nb_attr.h
+│   │   │   │       ├── nb_backend.h
+│   │   │   │       ├── nb_backend_slots.h
+│   │   │   │       ├── nb_call.h
+│   │   │   │       ├── nb_cast.h
+│   │   │   │       ├── nb_class.h
+│   │   │   │       ├── nb_defs.h
+│   │   │   │       ├── nb_descr.h
+│   │   │   │       ├── nb_error.h
+│   │   │   │       ├── nb_func.h
+│   │   │   │       ├── nb_misc.h
+│   │   │   │       ├── nb_platform.h
+│   │   │   │       ├── nb_python.h
+│   │   │   │       ├── nb_traits.h
+│   │   │   │       ├── nb_tuple.h
+│   │   │   │       ├── nb_types.h
+│   │   │   │       ├── ndarray.h
+│   │   │   │       ├── operators.h
+│   │   │   │       ├── stl
+│   │   │   │       │   ├── array.h
+│   │   │   │       │   ├── bind_map.h
+│   │   │   │       │   ├── bind_vector.h
+│   │   │   │       │   ├── chrono.h
+│   │   │   │       │   ├── complex.h
+│   │   │   │       │   ├── detail
+│   │   │   │       │   │   ├── nb_array.h
+│   │   │   │       │   │   ├── nb_dict.h
+│   │   │   │       │   │   ├── nb_list.h
+│   │   │   │       │   │   ├── nb_optional.h
+│   │   │   │       │   │   ├── nb_set.h
+│   │   │   │       │   │   └── traits.h
+│   │   │   │       │   ├── filesystem.h
+│   │   │   │       │   ├── function.h
+│   │   │   │       │   ├── list.h
+│   │   │   │       │   ├── map.h
+│   │   │   │       │   ├── optional.h
+│   │   │   │       │   ├── pair.h
+│   │   │   │       │   ├── set.h
+│   │   │   │       │   ├── shared_ptr.h
+│   │   │   │       │   ├── string.h
+│   │   │   │       │   ├── string_view.h
+│   │   │   │       │   ├── tuple.h
+│   │   │   │       │   ├── unique_ptr.h
+│   │   │   │       │   ├── unordered_map.h
+│   │   │   │       │   ├── unordered_set.h
+│   │   │   │       │   ├── variant.h
+│   │   │   │       │   ├── vector.h
+│   │   │   │       │   └── wstring.h
+│   │   │   │       ├── trampoline.h
+│   │   │   │       └── typing.h
+│   │   │   ├── LICENSE
+│   │   │   ├── nanobind-backend
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── pyproject.toml
+│   │   │   │   ├── README.md
+│   │   │   │   └── src
+│   │   │   │       └── nanobind_backend
+│   │   │   │           └── __init__.py
+│   │   │   ├── pyproject.toml
+│   │   │   ├── README.md
+│   │   │   ├── src
+│   │   │   │   ├── buffer.h
+│   │   │   │   ├── common.cpp
+│   │   │   │   ├── error.cpp
+│   │   │   │   ├── hash.h
+│   │   │   │   ├── implicit.cpp
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __main__.py
+│   │   │   │   ├── nb_backend.cpp
+│   │   │   │   ├── nb_combined.cpp
+│   │   │   │   ├── nb_datetime.cpp
+│   │   │   │   ├── nb_enum.cpp
+│   │   │   │   ├── nb_ft.cpp
+│   │   │   │   ├── nb_ft.h
+│   │   │   │   ├── nb_func.cpp
+│   │   │   │   ├── nb_internals.cpp
+│   │   │   │   ├── nb_internals.h
+│   │   │   │   ├── nb_ndarray.cpp
+│   │   │   │   ├── nb_static_property.cpp
+│   │   │   │   ├── nb_type.cpp
+│   │   │   │   ├── stubgen.py
+│   │   │   │   ├── trampoline.cpp
+│   │   │   │   └── version.py
+│   │   │   └── tests
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── common.py
+│   │   │       ├── conftest.py
+│   │   │       ├── inter_module.cpp
+│   │   │       ├── inter_module.h
+│   │   │       ├── object_py.h
+│   │   │       ├── pattern_file.nb
+│   │   │       ├── pattern_file_recursive.nb
+│   │   │       ├── py_recursive_stub_test
+│   │   │       │   ├── alias.py
+│   │   │       │   ├── alias.pyi.ref
+│   │   │       │   ├── bar.py
+│   │   │       │   ├── bar.pyi.ref
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── __init__.pyi.ref
+│   │   │       │   └── sub
+│   │   │       │       ├── __init__.py
+│   │   │       │       ├── __init__.pyi.ref
+│   │   │       │       ├── mod.py
+│   │   │       │       └── mod.pyi.ref
+│   │   │       ├── py_stub_test.py
+│   │   │       ├── py_stub_test.pyi.ref
+│   │   │       ├── test_abi_layout.cpp
+│   │   │       ├── test_abi_missing.cpp
+│   │   │       ├── test_abi_multi_1.cpp
+│   │   │       ├── test_abi_multi_2.cpp
+│   │   │       ├── test_abi_multi.h
+│   │   │       ├── test_abi.py
+│   │   │       ├── test_accessor.cpp
+│   │   │       ├── test_accessor.py
+│   │   │       ├── test_callbacks.cpp
+│   │   │       ├── test_callbacks.py
+│   │   │       ├── test_chrono.cpp
+│   │   │       ├── test_chrono.py
+│   │   │       ├── test_classes.cpp
+│   │   │       ├── test_classes_ext.pyi.ref
+│   │   │       ├── test_classes_extra.cpp
+│   │   │       ├── test_classes.h
+│   │   │       ├── test_classes.py
+│   │   │       ├── test_eigen.cpp
+│   │   │       ├── test_eigen.py
+│   │   │       ├── test_eigen_tensor.cpp
+│   │   │       ├── test_eigen_tensor.py
+│   │   │       ├── test_enum.cpp
+│   │   │       ├── test_enum_ext.pyi.ref
+│   │   │       ├── test_enum.py
+│   │   │       ├── test_eval.cpp
+│   │   │       ├── test_eval.py
+│   │   │       ├── test_exception.cpp
+│   │   │       ├── test_exception.py
+│   │   │       ├── test_foreign.cpp
+│   │   │       ├── test_foreign.py
+│   │   │       ├── test_functions.cpp
+│   │   │       ├── test_functions_ext.pyi.ref
+│   │   │       ├── test_functions.py
+│   │   │       ├── test_holders.cpp
+│   │   │       ├── test_holders.py
+│   │   │       ├── test_inter_module_1.cpp
+│   │   │       ├── test_inter_module_2.cpp
+│   │   │       ├── test_inter_module.py
+│   │   │       ├── test_intrusive.cpp
+│   │   │       ├── test_intrusive_impl.cpp
+│   │   │       ├── test_intrusive.py
+│   │   │       ├── test_issue.cpp
+│   │   │       ├── test_issue.py
+│   │   │       ├── test_jax.cpp
+│   │   │       ├── test_jax_ext.pyi.ref
+│   │   │       ├── test_jax.py
+│   │   │       ├── test_make_iterator.cpp
+│   │   │       ├── test_make_iterator_ext.pyi.ref
+│   │   │       ├── test_make_iterator.py
+│   │   │       ├── test_ndarray.cpp
+│   │   │       ├── test_ndarray_ext.pyi.ref
+│   │   │       ├── test_ndarray.py
+│   │   │       ├── test_prefix_module
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── __init__.pyi.ref
+│   │   │       │   ├── prefixabc.py
+│   │   │       │   ├── prefixabc.pyi.ref
+│   │   │       │   ├── prefix.py
+│   │   │       │   └── prefix.pyi.ref
+│   │   │       ├── test_specialization.py
+│   │   │       ├── test_stl_bind_map.cpp
+│   │   │       ├── test_stl_bind_map.py
+│   │   │       ├── test_stl_bind_vector.cpp
+│   │   │       ├── test_stl_bind_vector.py
+│   │   │       ├── test_stl.cpp
+│   │   │       ├── test_stl_ext.pyi.ref
+│   │   │       ├── test_stl.py
+│   │   │       ├── test_stubgen.py
+│   │   │       ├── test_stubs.py
+│   │   │       ├── test_tensorflow.cpp
+│   │   │       ├── test_tensorflow_ext.pyi.ref
+│   │   │       ├── test_tensorflow.py
+│   │   │       ├── test_thread.cpp
+│   │   │       ├── test_thread.py
+│   │   │       ├── test_typing.cpp
+│   │   │       ├── test_typing_ext.pyi.ref
+│   │   │       └── test_typing.py
+│   │   └── nanobind-subbuild
+│   │       ├── CMakeCache.txt
+│   │       ├── CMakeFiles
+│   │       │   ├── 4.3.1
+│   │       │   │   └── CMakeSystem.cmake
+│   │       │   ├── cmake.check_cache
+│   │       │   ├── CMakeConfigureLog.yaml
+│   │       │   ├── CMakeDirectoryInformation.cmake
+│   │       │   ├── CMakeRuleHashes.txt
+│   │       │   ├── InstallScripts.json
+│   │       │   ├── Makefile2
+│   │       │   ├── Makefile.cmake
+│   │       │   ├── nanobind-populate-complete
+│   │       │   ├── nanobind-populate.dir
+│   │       │   │   ├── build.make
+│   │       │   │   ├── cmake_clean.cmake
+│   │       │   │   ├── compiler_depend.make
+│   │       │   │   ├── compiler_depend.ts
+│   │       │   │   ├── DependInfo.cmake
+│   │       │   │   ├── Labels.json
+│   │       │   │   ├── Labels.txt
+│   │       │   │   └── progress.make
+│   │       │   ├── pkgRedirects
+│   │       │   ├── progress.marks
+│   │       │   └── TargetDirectories.txt
+│   │       ├── cmake_install.cmake
+│   │       ├── CMakeLists.txt
+│   │       ├── Makefile
+│   │       └── nanobind-populate-prefix
+│   │           ├── src
+│   │           │   └── nanobind-populate-stamp
+│   │           │       ├── nanobind-populate-build
+│   │           │       ├── nanobind-populate-configure
+│   │           │       ├── nanobind-populate-done
+│   │           │       ├── nanobind-populate-download
+│   │           │       ├── nanobind-populate-gitclone-lastrun.txt
+│   │           │       ├── nanobind-populate-gitinfo.txt
+│   │           │       ├── nanobind-populate-install
+│   │           │       ├── nanobind-populate-mkdir
+│   │           │       ├── nanobind-populate-patch
+│   │           │       ├── nanobind-populate-patch-info.txt
+│   │           │       ├── nanobind-populate-test
+│   │           │       └── nanobind-populate-update-info.txt
+│   │           └── tmp
+│   │               ├── nanobind-populate-cfgcmd.txt
+│   │               ├── nanobind-populate-gitclone.cmake
+│   │               ├── nanobind-populate-gitupdate.cmake
+│   │               └── nanobind-populate-mkdirs.cmake
+│   ├── Makefile
+│   └── Testing
+│       └── Temporary
+│           └── LastTest.log
+├── CMAKE_FIX.txt
+├── CMakeLists.txt
 ├── engine
 │   ├── core
 │   │   ├── backend
@@ -46,7 +799,6 @@
 │   │   │   │   │   ├── glad.c
 │   │   │   │   │   ├── glad.h
 │   │   │   │   │   └── khrplatform.h
-│   │   │   │   ├── glad_loader.cpython-314t-x86_64-linux-gnu.so
 │   │   │   │   ├── MeshGL3.cpp
 │   │   │   │   ├── MeshGL3.hpp
 │   │   │   │   ├── RendererGL3.cpp
@@ -55,9 +807,7 @@
 │   │   │   │   ├── ShaderGL3.hpp
 │   │   │   │   ├── Texture.cpp
 │   │   │   │   └── Texture.hpp
-│   │   │   ├── gles3
-│   │   │   ├── manager.cpp
-│   │   │   └── manager.hpp
+│   │   │   └── gles3
 │   │   ├── base
 │   │   │   ├── config.cpp
 │   │   │   ├── config.hpp
@@ -71,83 +821,12 @@
 │   │   │   ├── system.hpp
 │   │   │   ├── time.cpp
 │   │   │   └── time.hpp
-│   │   ├── inputs
-│   │   │   ├── input.cpp
-│   │   │   └── input.hpp
 │   │   └── window
+│   │       ├── glfw_raii.cpp
+│   │       ├── glfw_raii.hpp
 │   │       ├── window.cpp
 │   │       └── window.hpp
-│   ├── cython
-│   │   ├── backend
-│   │   │   ├── gl3
-│   │   │   │   ├── gl3.cpp
-│   │   │   │   ├── gl3.cpython-314t-x86_64-linux-gnu.so
-│   │   │   │   ├── gl3.cpython-314-x86_64-linux-gnu.so
-│   │   │   │   ├── gl3.html
-│   │   │   │   ├── gl3.pxd
-│   │   │   │   ├── gl3.pyx
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── __pycache__
-│   │   │   │       └── __init__.cpython-314.pyc
-│   │   │   ├── gles3
-│   │   │   ├── __init__.py
-│   │   │   ├── manager.cpp
-│   │   │   ├── manager.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── manager.pxd
-│   │   │   ├── manager.pyx
-│   │   │   └── __pycache__
-│   │   │       └── __init__.cpython-314.pyc
-│   │   ├── base
-│   │   │   ├── config.cpp
-│   │   │   ├── config.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── config.pxd
-│   │   │   ├── config.pyx
-│   │   │   ├── events.cpp
-│   │   │   ├── events.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── events.pxd
-│   │   │   ├── events.pyx
-│   │   │   ├── __init__.py
-│   │   │   ├── lifecycle.cpp
-│   │   │   ├── lifecycle.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── lifecycle.pxd
-│   │   │   ├── lifecycle.pyx
-│   │   │   ├── log.cpp
-│   │   │   ├── log.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── log.pxd
-│   │   │   ├── log.pyx
-│   │   │   ├── __pycache__
-│   │   │   │   └── __init__.cpython-314.pyc
-│   │   │   ├── system.cpp
-│   │   │   ├── system.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── system.pxd
-│   │   │   ├── system.pyx
-│   │   │   ├── time.cpp
-│   │   │   ├── time.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── time.pxd
-│   │   │   └── time.pyx
-│   │   ├── __init__.py
-│   │   ├── input
-│   │   │   ├── __init__.py
-│   │   │   ├── input.cpp
-│   │   │   ├── input.cpython-314-x86_64-linux-gnu.so
-│   │   │   ├── input.pxd
-│   │   │   └── input.pyx
-│   │   ├── __pycache__
-│   │   │   ├── __init__.cpython-313.pyc
-│   │   │   └── __init__.cpython-314.pyc
-│   │   └── window
-│   │       ├── __init__.py
-│   │       ├── __pycache__
-│   │       │   ├── __init__.cpython-313.pyc
-│   │       │   └── __init__.cpython-314.pyc
-│   │       ├── window.cpp
-│   │       ├── window.cpython-314-x86_64-linux-gnu.so
-│   │       ├── window.pxd
-│   │       └── window.pyx
 │   ├── __init__.py
-│   ├── __pycache__
-│   │   ├── __init__.cpython-313.pyc
-│   │   └── __init__.cpython-314.pyc
 │   └── python
 │       ├── base
 │       │   ├── config.py
@@ -155,33 +834,16 @@
 │       │   ├── __init__.py
 │       │   ├── lifecycle.py
 │       │   ├── log.py
-│       │   ├── __pycache__
-│       │   │   ├── config.cpython-314.pyc
-│       │   │   ├── __init__.cpython-314.pyc
-│       │   │   └── r2d2core.cpython-314.pyc
 │       │   ├── r2d2core.py
 │       │   ├── system.py
 │       │   └── time.py
 │       ├── __init__.py
-│       ├── input
-│       │   ├── __init__.py
-│       │   └── input.py
-│       ├── __pycache__
-│       │   └── __init__.cpython-314.pyc
-│       ├── renderer
-│       │   ├── __init__.py
-│       │   ├── __pycache__
-│       │   │   ├── __init__.cpython-314.pyc
-│       │   │   └── renderer.cpython-314.pyc
-│       │   └── renderer.py
 │       └── window
 │           ├── __init__.py
-│           ├── __pycache__
-│           │   ├── __init__.cpython-314.pyc
-│           │   └── window.cpython-314.pyc
 │           └── window.py
+├── MIGRATION_CMAKE.md
 ├── README.md
 ├── setup.py
 └── tree.txt
 
-48 directories, 137 files
+114 directories, 733 files

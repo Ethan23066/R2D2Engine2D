@@ -1,5 +1,5 @@
 #include <nanobind/nanobind.h>
-#include <nanobind/stl.h>
+#include <nanobind/stl/string.h>
 
 #include "engine/core/window/window.hpp"
 #include "engine/core/backend/gl3/RendererGL3.hpp"
