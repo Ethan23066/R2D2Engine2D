@@ -72,13 +72,19 @@ if(BUILD_PY_BINDINGS)
         ${ENGINE_C_SRCS}
     )
 
-    target_include_directories(_r2d2 PRIVATE
+    set(R2D2_PUBLIC_INCLUDES
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/engine/core
-        ${GLFW_INCLUDEDIR}
+        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3
         ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
-        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad/include
+        ${GLFW_INCLUDEDIR}
     )
+
+    if(DEFINED nanobind_SOURCE_DIR)
+        list(APPEND R2D2_PUBLIC_INCLUDES "${nanobind_SOURCE_DIR}/include")
+    endif()
+
+    target_include_directories(_r2d2 PRIVATE ${R2D2_PUBLIC_INCLUDES})
 
     target_compile_features(_r2d2 PRIVATE cxx_std_23)
 
@@ -102,9 +108,9 @@ if(BUILD_DEMO)
     target_include_directories(r2d2_demo PRIVATE
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/engine/core
-        ${GLFW_INCLUDEDIR}
+        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3
         ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
-        ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad/include
+        ${GLFW_INCLUDEDIR}
     )
     target_compile_features(r2d2_demo PRIVATE cxx_std_23)
     target_link_libraries(r2d2_demo PRIVATE ${GLFW_LIBRARIES} OpenGL::GL)
