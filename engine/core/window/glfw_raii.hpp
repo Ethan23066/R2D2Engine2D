@@ -2,6 +2,8 @@
 
 #include <GLFW/glfw3.h>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 namespace r2d2 {
 
@@ -16,6 +18,7 @@ public:
 
 private:
     bool initialized_ = false;
+    std::mutex init_mutex_;
 };
 
 class GlfwWindow {
@@ -31,11 +34,15 @@ public:
     void swap_buffers() noexcept;
     GLFWwindow* get() const noexcept;
 
-    // Create a window or return nullptr on failure
     static std::unique_ptr<GlfwWindow> create(int width, int height, const char* title, bool fullscreen, bool resizable, int monitor_index = 0);
+
+    void set_owner(std::thread::id owner) noexcept;
+    bool owns_current_thread() const noexcept;
 
 private:
     GLFWwindow* window_ = nullptr;
+    std::thread::id owner_thread_{};
+    mutable std::mutex mutex_;
 };
 
 } // namespace r2d2

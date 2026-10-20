@@ -3,10 +3,12 @@
 namespace r2d2 {
 
 void EventQueue::push(const Event& e) {
+    std::scoped_lock lock(mutex_);
     queue_.push(e);
 }
 
 bool EventQueue::poll(Event& out) {
+    std::scoped_lock lock(mutex_);
     if (queue_.empty())
         return false;
 
@@ -16,6 +18,7 @@ bool EventQueue::poll(Event& out) {
 }
 
 void EventQueue::clear() {
+    std::scoped_lock lock(mutex_);
     while (!queue_.empty())
         queue_.pop();
 }

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <queue>
 #include <cstdint>
+#include <mutex>
+#include <queue>
 
 namespace r2d2 {
 
@@ -31,6 +32,7 @@ public:
     void clear();
 
 private:
+    std::mutex mutex_;
     std::queue<Event> queue_;
 };
 
