@@ -27,7 +27,41 @@ list(APPEND ENGINE_C_SRCS "${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad/glad
 
 # Python & nanobind
 if(BUILD_PY_BINDINGS)
-    find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+    # Prefer the newest free-threaded Python build in /opt/python*/bin if it exists.
+    execute_process(
+        COMMAND bash -lc "ls -1 /opt/python*/bin/python3* 2>/dev/null | grep -E 'python3\\.[0-9]+t$' | sort -V | tail -n 1"
+        RESULT_VARIABLE _python_t_status
+        OUTPUT_VARIABLE _python_t_exec
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(NOT _python_t_status EQUAL 0 OR "${_python_t_exec}" STREQUAL "")
+        # Fall back to the newest standard Python build in /opt/python*/bin.
+        execute_process(
+            COMMAND bash -lc "ls -1 /opt/python*/bin/python3* 2>/dev/null | sort -V | tail -n 1"
+            RESULT_VARIABLE _python_status
+            OUTPUT_VARIABLE _python_exec
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    else()
+        set(_python_status 0)
+        set(_python_exec "${_python_t_exec}")
+    endif()
+
+    if(NOT _python_status EQUAL 0 OR "${_python_exec}" STREQUAL "")
+        message(FATAL_ERROR "No suitable Python interpreter found under /opt/python*/bin")
+    endif()
+
+    set(Python_EXECUTABLE "${_python_exec}" CACHE FILEPATH "Python interpreter" FORCE)
+    message(STATUS "Using Python executable: ${Python_EXECUTABLE}")
+
+    # Make sure the root directory is also known for the Python package search.
+    get_filename_component(Python_ROOT_DIR "${Python_EXECUTABLE}" DIRECTORY)
+    get_filename_component(Python_ROOT_DIR "${Python_ROOT_DIR}" DIRECTORY)
+    set(Python_ROOT_DIR "${Python_ROOT_DIR}" CACHE PATH "Python root directory" FORCE)
+
+    find_package(Python 3 REQUIRED COMPONENTS Interpreter Development.Module)
+    message(STATUS "Python version found: ${Python_VERSION}")
 
     include(FetchContent)
     FetchContent_Declare(
@@ -50,7 +84,12 @@ if(BUILD_PY_BINDINGS)
         ${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad
         ${GLFW_INCLUDEDIR}
         ${Python_INCLUDE_DIRS}
+        ${nanobind_SOURCE_DIR}/include
     )
+
+    target_compile_features(_r2d2 PRIVATE cxx_std_23)
+    target_compile_options(_r2d2 PRIVATE -fno-lto)
+    target_link_options(_r2d2 PRIVATE -fno-lto)
 
     target_link_libraries(_r2d2 PRIVATE
         ${GLFW_LIBRARIES}
