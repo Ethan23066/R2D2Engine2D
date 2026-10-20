@@ -1,4 +1,5 @@
 #pragma once
+
 #include <chrono>
 
 namespace r2d2 {
@@ -17,4 +18,4 @@ private:
     double delta_time;
 };
 
-}
+} // namespace r2d2

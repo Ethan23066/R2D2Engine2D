@@ -2,12 +2,10 @@
 
 namespace r2d2 {
 
-Lifecycle::Lifecycle()
-    : running_(false)
-{}
+Lifecycle::Lifecycle() = default;
 
 void Lifecycle::init() {
-    running_.store(true);
+    running_.store(true, std::memory_order_release);
 }
 
 void Lifecycle::update() {
@@ -15,12 +13,11 @@ void Lifecycle::update() {
 }
 
 void Lifecycle::shutdown() {
-    running_.store(false);
+    running_.store(false, std::memory_order_release);
 }
 
 uint8_t Lifecycle::is_running() const {
-    return running_ ? 1 : 0;
+    return running_.load(std::memory_order_acquire) ? 1U : 0U;
 }
-
 
 } // namespace r2d2

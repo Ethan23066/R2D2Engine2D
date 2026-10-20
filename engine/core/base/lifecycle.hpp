@@ -8,11 +8,8 @@ class Lifecycle {
 public:
     Lifecycle();
 
-    // Interdire copie
     Lifecycle(const Lifecycle&) = delete;
     Lifecycle& operator=(const Lifecycle&) = delete;
-
-    // Interdire move
     Lifecycle(Lifecycle&&) = delete;
     Lifecycle& operator=(Lifecycle&&) = delete;
 
@@ -22,7 +19,7 @@ public:
     uint8_t is_running() const;
 
 private:
-    std::atomic<bool> running_;
+    std::atomic<bool> running_{false};
 };
 
 } // namespace r2d2

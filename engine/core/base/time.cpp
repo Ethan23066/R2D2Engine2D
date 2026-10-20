@@ -9,9 +9,11 @@ Time::Time() {
 }
 
 void Time::update() {
-    current = std::chrono::steady_clock::now();
-    delta_time = std::chrono::duration<double>(current - last).count();
-    last = current;
+    const auto now = std::chrono::steady_clock::now();
+    const std::chrono::duration<double> duration = now - last;
+    delta_time = duration.count();
+    last = now;
+    current = now;
 }
 
 double Time::delta() const {
@@ -22,4 +24,4 @@ double Time::now() const {
     return std::chrono::duration<double>(current.time_since_epoch()).count();
 }
 
-}
+} // namespace r2d2
