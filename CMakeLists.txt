@@ -79,6 +79,10 @@ if(BUILD_PY_BINDINGS)
         list(APPEND R2D2_PUBLIC_INCLUDES "${nanobind_SOURCE_DIR}/include")
     endif()
 
+    if(DEFINED Python_INCLUDE_DIRS)
+        list(APPEND R2D2_PUBLIC_INCLUDES "${Python_INCLUDE_DIRS}")
+    endif()
+
     target_include_directories(_r2d2 PRIVATE ${R2D2_PUBLIC_INCLUDES})
     target_compile_features(_r2d2 PRIVATE cxx_std_23)
 
@@ -88,6 +92,7 @@ if(BUILD_PY_BINDINGS)
 
     # Avoid linking libpython statically into a Python extension module; nanobind handles the ABI.
     target_link_libraries(_r2d2 PRIVATE
+        Python::Module
         ${NANOBIND_TARGET}
         ${GLFW_LIBRARIES}
         OpenGL::GL
