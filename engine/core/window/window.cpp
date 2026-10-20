@@ -32,8 +32,8 @@ void* WindowState::native_handle() const noexcept {
 
 bool WindowState::is_owner_thread() const noexcept {
     const auto current = std::this_thread::get_id();
-    const auto owner = owner();
-    return owner == std::thread::id{} || owner == current;
+    const auto owner_id = owner();
+    return owner_id == std::thread::id{} || owner_id == current;
 }
 
 } // namespace r2d2
