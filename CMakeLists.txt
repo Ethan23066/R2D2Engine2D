@@ -16,7 +16,9 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED glfw3)
 find_package(OpenGL REQUIRED)
 
-# Collect engine sources
+# Collect engine sources.
+# This glob intentionally covers the whole engine/core tree, including the new
+# render/thread/performance subdirectories, without requiring a manual source list.
 file(GLOB_RECURSE ENGINE_CPP_SRCS CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/engine/core/*.cpp"
 )
@@ -27,7 +29,7 @@ list(APPEND ENGINE_C_SRCS "${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad/glad
 
 # Python & nanobind
 if(BUILD_PY_BINDINGS)
-    # Prefer the newest free-threaded Python build in /opt/python*/bin if it exists.
+    # Prefer a free-threaded Python build if present.
     execute_process(
         COMMAND bash -lc "ls -1 /opt/python*/bin/python3* 2>/dev/null | grep -E 'python3\\.[0-9]+t$' | sort -V | tail -n 1"
         RESULT_VARIABLE _python_t_status
@@ -36,7 +38,6 @@ if(BUILD_PY_BINDINGS)
     )
 
     if(NOT _python_t_status EQUAL 0 OR "${_python_t_exec}" STREQUAL "")
-        # Fall back to the newest standard Python build in /opt/python*/bin.
         execute_process(
             COMMAND bash -lc "ls -1 /opt/python*/bin/python3* 2>/dev/null | sort -V | tail -n 1"
             RESULT_VARIABLE _python_status
@@ -55,7 +56,6 @@ if(BUILD_PY_BINDINGS)
     set(Python_EXECUTABLE "${_python_exec}" CACHE FILEPATH "Python interpreter" FORCE)
     message(STATUS "Using Python executable: ${Python_EXECUTABLE}")
 
-    # Make sure the root directory is also known for the Python package search.
     get_filename_component(Python_ROOT_DIR "${Python_EXECUTABLE}" DIRECTORY)
     get_filename_component(Python_ROOT_DIR "${Python_ROOT_DIR}" DIRECTORY)
     set(Python_ROOT_DIR "${Python_ROOT_DIR}" CACHE PATH "Python root directory" FORCE)
