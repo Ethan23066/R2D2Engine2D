@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 include(GNUInstallDirs)
+include(CTest)
 
 # Build options
 option(BUILD_PY_BINDINGS "Build Python bindings (nanobind)" ON)
@@ -17,8 +18,7 @@ pkg_check_modules(GLFW REQUIRED glfw3)
 find_package(OpenGL REQUIRED)
 
 # Collect engine sources.
-# This glob intentionally covers the whole engine/core tree, including the new
-# render/thread/performance subdirectories, without requiring a manual source list.
+# This includes all engine/core files, including new render/thread/performance layers.
 file(GLOB_RECURSE ENGINE_CPP_SRCS CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/engine/core/*.cpp"
 )
@@ -29,7 +29,6 @@ list(APPEND ENGINE_C_SRCS "${CMAKE_SOURCE_DIR}/engine/core/backend/gl3/glad/glad
 
 # Python & nanobind
 if(BUILD_PY_BINDINGS)
-    # Prefer a free-threaded Python build if present.
     execute_process(
         COMMAND bash -lc "ls -1 /opt/python*/bin/python3* 2>/dev/null | grep -E 'python3\\.[0-9]+t$' | sort -V | tail -n 1"
         RESULT_VARIABLE _python_t_status
@@ -106,6 +105,7 @@ if(BUILD_PY_BINDINGS)
     )
 endif()
 
+# Demo target
 if(BUILD_DEMO)
     set(DEMO_MAIN "${CMAKE_SOURCE_DIR}/examples/demo/main.cpp")
     if(EXISTS "${DEMO_MAIN}")
@@ -127,3 +127,23 @@ if(BUILD_DEMO)
         message(WARNING "BUILD_DEMO enabled but examples/demo/main.cpp not found — skipping demo target")
     endif()
 endif()
+
+# Smoke test
+add_executable(r2d2_performance_test
+    tests/performance_profile_test.cpp
+)
+
+target_include_directories(r2d2_performance_test PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/engine/core
+    ${GLFW_INCLUDEDIR}
+)
+
+target_compile_features(r2d2_performance_test PRIVATE cxx_std_23)
+
+target_link_libraries(r2d2_performance_test PRIVATE
+    ${GLFW_LIBRARIES}
+    OpenGL::GL
+)
+
+add_test(NAME r2d2_performance_test COMMAND r2d2_performance_test)
