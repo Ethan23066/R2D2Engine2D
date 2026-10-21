@@ -5,6 +5,7 @@
 #include "engine/core/window/window.hpp"
 #include "engine/core/backend/gl3/RendererGL3.hpp"
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -57,22 +58,25 @@ struct PyWindow {
 };
 
 struct PyLifecycle {
-    r2d2::Lifecycle lifecycle;
+    std::unique_ptr<r2d2::Lifecycle> self;
+
+    PyLifecycle()
+        : self(std::make_unique<r2d2::Lifecycle>()) {}
 
     void init() {
-        lifecycle.init();
+        self->init();
     }
 
     void update() {
-        lifecycle.update();
+        self->update();
     }
 
     void shutdown() {
-        lifecycle.shutdown();
+        self->shutdown();
     }
 
     bool is_running() const {
-        return lifecycle.is_running() != 0U;
+        return self->is_running() != 0U;
     }
 };
 
