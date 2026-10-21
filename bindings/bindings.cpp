@@ -1,6 +1,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 
+#include "engine/core/base/lifecycle.hpp"
 #include "engine/core/window/window.hpp"
 #include "engine/core/backend/gl3/RendererGL3.hpp"
 
@@ -16,12 +17,11 @@ struct PyWindow {
         EngineWindowConfig cfg;
         cfg.width = width;
         cfg.height = height;
-        py_title = title;                     // keep ownership of the string
+        py_title = title;
         cfg.title = py_title.c_str();
         cfg.fullscreen = fullscreen;
         cfg.resizable = resizable;
 
-        // engine_window_init may call into native libraries; release the GIL while doing native work
         nb::gil_scoped_release release;
         if (!engine_window_init(&cfg))
             throw std::runtime_error("engine_window_init failed");
@@ -43,18 +43,36 @@ struct PyWindow {
     }
 
     bool should_close() const {
-        // polling state is cheap; keep GIL for simple boolean check
         return engine_window_should_close();
     }
 
     void run() {
-        // run is a potentially long blocking call -> release GIL so Python threads can run
         nb::gil_scoped_release release;
         engine_window_run();
     }
 
     void *native_handle() const {
         return engine_window_get_native_handle();
+    }
+};
+
+struct PyLifecycle {
+    r2d2::Lifecycle lifecycle;
+
+    void init() {
+        lifecycle.init();
+    }
+
+    void update() {
+        lifecycle.update();
+    }
+
+    void shutdown() {
+        lifecycle.shutdown();
+    }
+
+    bool is_running() const {
+        return lifecycle.is_running() != 0U;
     }
 };
 
@@ -70,13 +88,19 @@ NB_MODULE(_r2d2, m) {
         .def("run", &PyWindow::run)
         .def("native_handle", &PyWindow::native_handle);
 
+    nb::class_<PyLifecycle>(m, "Lifecycle")
+        .def(nb::init<>())
+        .def("init", &PyLifecycle::init)
+        .def("update", &PyLifecycle::update)
+        .def("shutdown", &PyLifecycle::shutdown)
+        .def("is_running", &PyLifecycle::is_running);
+
     nb::class_<RendererGL3>(m, "RendererGL3")
         .def(nb::init<>())
         .def("init", [](RendererGL3 &self, int w, int h) {
             void *handle = engine_window_get_native_handle();
             if (!handle)
                 throw std::runtime_error("no native window available");
-            // Loading GL function pointers and doing GL setup can be slow; run without GIL
             nb::gil_scoped_release release;
             int res = self.init(handle, w, h);
             if (!res)
