@@ -14,6 +14,7 @@ public:
 
     void set_context_owner(std::thread::id owner) noexcept;
     bool owns_context() const noexcept;
+    bool is_current_thread_owner() const noexcept;
 
 private:
     void* window = nullptr;
