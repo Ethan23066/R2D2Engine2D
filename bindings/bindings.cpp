@@ -11,6 +11,9 @@
 
 namespace nb = nanobind;
 
+// Instance globale statique pour le cycle de vie au niveau du module Python
+static r2d2::Lifecycle g_lifecycle;
+
 struct PyWindow {
     std::string py_title;
 
@@ -57,32 +60,15 @@ struct PyWindow {
     }
 };
 
-struct PyLifecycle {
-    std::unique_ptr<r2d2::Lifecycle> self;
-
-    PyLifecycle()
-        : self(std::make_unique<r2d2::Lifecycle>()) {}
-
-    void init() {
-        self->init();
-    }
-
-    void update() {
-        self->update();
-    }
-
-    void shutdown() {
-        self->shutdown();
-    }
-
-    bool is_running() const {
-        return self->is_running() != 0U;
-    }
-};
-
+// Déclaration du module avec le flag Free-Threaded
 NB_MODULE(_r2d2, m) {
-    m.doc() = "R2D2Engine2D native bindings (nanobind)";
+    // Flag indispensable pour nanobind + Python 3.14t (Free-Threaded)
+    // Indique à l'interpréteur que le module gère ses propres verrous et relâche le GIL de manière sûre.
+    m.attr("_gil_disabled") = true;
 
+    m.doc() = "R2D2Engine2D native bindings (nanobind Free-Threaded)";
+
+    // --- ENTRÉES ET FENÊTRAGE ---
     nb::class_<PyWindow>(m, "Window")
         .def(nb::init<int, int, const std::string &, bool, bool>(),
              "Create a Window (width, height, title, fullscreen, resizable)")
@@ -92,13 +78,14 @@ NB_MODULE(_r2d2, m) {
         .def("run", &PyWindow::run)
         .def("native_handle", &PyWindow::native_handle);
 
-    nb::class_<PyLifecycle>(m, "Lifecycle")
-        .def(nb::init<>())
-        .def("init", &PyLifecycle::init)
-        .def("update", &PyLifecycle::update)
-        .def("shutdown", &PyLifecycle::shutdown)
-        .def("is_running", &PyLifecycle::is_running);
+    // --- REFAÇONNAGE DE LIFECYCLE (Fonctions globales de module) ---
+    // Plus besoin d'instancier un objet en Python ! Vous appelez directement _r2d2.init()
+    m.def("init", []() { g_lifecycle.init(); }, "Initialize the engine lifecycle");
+    m.def("update", []() { g_lifecycle.update(); }, "Update the engine lifecycle");
+    m.def("shutdown", []() { g_lifecycle.shutdown(); }, "Shutdown the engine lifecycle");
+    m.def("is_running", []() { return g_lifecycle.is_running() != 0U; }, "Check if the engine is running");
 
+    // --- RENDU OPENGL 3 ---
     nb::class_<RendererGL3>(m, "RendererGL3")
         .def(nb::init<>())
         .def("init", [](RendererGL3 &self, int w, int h) {
