@@ -71,6 +71,11 @@ NB_MODULE(_r2d2, m) {
     // --- ENTRÉES ET FENÊTRAGE ---
     nb::class_<PyWindow>(m, "Window")
         .def(nb::init<int, int, const std::string &, bool, bool>(),
+             nb::arg("width"),
+             nb::arg("height"),
+             nb::arg("title") = "R2D2",
+             nb::arg("fullscreen") = false,
+             nb::arg("resizable") = true,
              "Create a Window (width, height, title, fullscreen, resizable)")
         .def("swap_buffers", &PyWindow::swap_buffers)
         .def("poll_events", &PyWindow::poll_events)
@@ -97,8 +102,9 @@ NB_MODULE(_r2d2, m) {
             if (!res)
                 throw std::runtime_error("RendererGL3::init failed");
             return res;
-        }, "Initialize renderer with current window and size")
-        .def("begin_frame", &RendererGL3::begin_frame)
+        }, nb::arg("width"), nb::arg("height"), "Initialize renderer with current window and size")
+        .def("begin_frame", &RendererGL3::begin_frame,
+             nb::arg("r"), nb::arg("g"), nb::arg("b"), nb::arg("a"))
         .def("end_frame", &RendererGL3::end_frame)
         .def("shutdown", &RendererGL3::shutdown);
 }
