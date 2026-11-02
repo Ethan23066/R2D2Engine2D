@@ -4,6 +4,9 @@
 #include "engine/core/base/lifecycle.hpp"
 #include "engine/core/window/window.hpp"
 #include "engine/core/backend/gl3/RendererGL3.hpp"
+#include "engine/core/backend/gl3/ShaderGL3.hpp"
+#include "engine/core/backend/gl3/MeshGL3.hpp"
+#include "engine/core/backend/gl3/Texture.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -63,19 +66,14 @@ struct PyWindow {
 // Déclaration du module avec le flag Free-Threaded
 NB_MODULE(_r2d2, m) {
     // Flag indispensable pour nanobind + Python 3.14t (Free-Threaded)
-    // Indique à l'interpréteur que le module gère ses propres verrous et relâche le GIL de manière sûre.
     m.attr("_gil_disabled") = true;
-
     m.doc() = "R2D2Engine2D native bindings (nanobind Free-Threaded)";
 
     // --- ENTRÉES ET FENÊTRAGE ---
     nb::class_<PyWindow>(m, "Window")
         .def(nb::init<int, int, const std::string &, bool, bool>(),
-             nb::arg("width"),
-             nb::arg("height"),
-             nb::arg("title") = "R2D2",
-             nb::arg("fullscreen") = false,
-             nb::arg("resizable") = true,
+             nb::arg("width"), nb::arg("height"), nb::arg("title") = "R2D2",
+             nb::arg("fullscreen") = false, nb::arg("resizable") = true,
              "Create a Window (width, height, title, fullscreen, resizable)")
         .def("swap_buffers", &PyWindow::swap_buffers)
         .def("poll_events", &PyWindow::poll_events)
@@ -84,7 +82,6 @@ NB_MODULE(_r2d2, m) {
         .def("native_handle", &PyWindow::native_handle);
 
     // --- REFAÇONNAGE DE LIFECYCLE (Fonctions globales de module) ---
-    // Plus besoin d'instancier un objet en Python ! Vous appelez directement _r2d2.init()
     m.def("init", []() { g_lifecycle.init(); }, "Initialize the engine lifecycle");
     m.def("update", []() { g_lifecycle.update(); }, "Update the engine lifecycle");
     m.def("shutdown", []() { g_lifecycle.shutdown(); }, "Shutdown the engine lifecycle");
@@ -107,4 +104,36 @@ NB_MODULE(_r2d2, m) {
              nb::arg("r"), nb::arg("g"), nb::arg("b"), nb::arg("a"))
         .def("end_frame", &RendererGL3::end_frame)
         .def("shutdown", &RendererGL3::shutdown);
+
+    // --- SHADER GL3 ---
+    nb::class_<ShaderGL3>(m, "ShaderGL3")
+        .def(nb::init<>())
+        .def("load", [](ShaderGL3 &self, const std::string &vs_path, const std::string &fs_path) {
+            nb::gil_scoped_release release;
+            return self.load(vs_path.c_str(), fs_path.c_str());
+        }, nb::arg("vs_path"), nb::arg("fs_path"), "Load and compile shaders from file paths")
+        .def("use", [](ShaderGL3 &self) {
+            self.use();
+        }, "Bind the shader program for rendering");
+
+    // --- TEXTURE ---
+    nb::class_<Texture>(m, "Texture")
+        .def(nb::init<>())
+        .def("load", [](Texture &self, const std::string &path) {
+            nb::gil_scoped_release release;
+            return self.load(path.c_str());
+        }, nb::arg("path"), "Load an image file into an OpenGL texture")
+        .def("bind", [](Texture &self, int unit) {
+            self.bind(unit);
+        }, nb::arg("unit"), "Bind texture to a specific texture unit slot");
+
+    // --- MESH GL3 ---
+    nb::class_<MeshGL3>(m, "MeshGL3")
+        .def(nb::init<>())
+        .def("upload", [](MeshGL3 &self) {
+            self.upload();
+        }, "Upload mesh geometry data to the GPU buffers")
+        .def("draw", [](MeshGL3 &self) {
+            self.draw();
+        }, "Submit mesh geometry to the current GPU bound pipeline");
 }
