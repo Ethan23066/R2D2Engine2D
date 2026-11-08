@@ -82,10 +82,3 @@ Roadmap proche :
 1. enrichir l’API native/py (`Texture`, `Mesh`, `Shader`, entrées)
 2. renforcer les tests CTest
 3. stabiliser l’API publique et la documentation
-
-## Arborescence utile
-
-- `/home/runner/work/R2D2Engine2D/R2D2Engine2D/CMakeLists.txt`
-- `/home/runner/work/R2D2Engine2D/R2D2Engine2D/bindings/bindings.cpp`
-- `/home/runner/work/R2D2Engine2D/R2D2Engine2D/examples/demo/main.cpp`
-- `/home/runner/work/R2D2Engine2D/R2D2Engine2D/tests/performance_profile_test.cpp`
