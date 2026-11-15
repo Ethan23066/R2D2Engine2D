@@ -38,6 +38,7 @@ target_include_directories(r2d2_core PUBLIC
 
 target_compile_features(r2d2_core PUBLIC cxx_std_23)
 target_link_libraries(r2d2_core PUBLIC PkgConfig::GLFW OpenGL::GL)
+
 # ==============================================================================
 # 2. MODULE PYTHON (Verrouillé de force sur la version Free-Threaded t sans GIL)
 # ==============================================================================
@@ -49,12 +50,12 @@ if(BUILD_PY_BINDINGS)
     find_package(Python 3.14 REQUIRED COMPONENTS Interpreter Development.Module)
     message(STATUS "🔥 RECONNEXION MULTI-THREAD : Python Free-Threaded détecté : ${Python_VERSION}")
 
-    # Récupération automatique avec isolation des sous-cibles de nanobind
+    # Récupération automatique avec l'URL de dépôt Git complète pour la version v3.1.0
     include(FetchContent)
     FetchContent_Declare(
             nanobind
-            GIT_REPOSITORY  https://github.com/wjakob/nanobind.git
-            GIT_TAG        v2.7.0        # Remise de la version exacte d'Ethan
+            GIT_REPOSITORY https://github.com/wjakob/nanobind
+            GIT_TAG        master
             GIT_SHALLOW    YES
     )
 
@@ -64,8 +65,9 @@ if(BUILD_PY_BINDINGS)
 
     FetchContent_MakeAvailable(nanobind)
 
-    # Compilation des bindings
+    # Compilation des bindings avec le drapeau réglementaire No-GIL (FREE_THREADED)
     nanobind_add_module(_r2d2 NB_SHARED
+            FREE_THREADED
             bindings/bindings.cpp
     )
 
