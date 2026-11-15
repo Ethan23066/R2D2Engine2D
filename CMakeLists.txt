@@ -16,6 +16,7 @@ option(BUILD_DEMO "Build demo executable" ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
 find_package(OpenGL REQUIRED)
+find_package(Threads REQUIRED)
 
 # ==============================================================================
 # 1. ARCHITECTURE CENTRALISÉE : LA BIBLIOTHÈQUE DU MOTEUR (r2d2_core)
@@ -37,7 +38,7 @@ target_include_directories(r2d2_core PUBLIC
 )
 
 target_compile_features(r2d2_core PUBLIC cxx_std_23)
-target_link_libraries(r2d2_core PUBLIC PkgConfig::GLFW OpenGL::GL)
+target_link_libraries(r2d2_core PUBLIC PkgConfig::GLFW OpenGL::GL Threads::Threads)
 
 # ==============================================================================
 # 2. MODULE PYTHON (Verrouillé de force sur la version Free-Threaded t sans GIL)
