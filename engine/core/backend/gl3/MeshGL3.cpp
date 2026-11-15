@@ -2,7 +2,6 @@
 #include <glad/glad.h>
 #include <thread>
 MeshGL3::~MeshGL3() {
-    // Destroy GPU objects while the owning context is still alive.
     if (!owns_context()) return;
     if (vbo_) glDeleteBuffers(1, &vbo_);
     if (vao_) glDeleteVertexArrays(1, &vao_);
@@ -13,9 +12,16 @@ bool MeshGL3::owns_context() const noexcept {
 }
 void MeshGL3::upload() {
     if (!owns_context() || uploaded_) return;
+    if (owner_thread_ == std::thread::id{}) owner_thread_ = std::this_thread::get_id();
     glGenVertexArrays(1, &vao_);
     glGenBuffers(1, &vbo_);
-    uploaded_ = vao_ != 0 && vbo_ != 0;
+    if (!vao_ || !vbo_) {
+        if (vbo_) glDeleteBuffers(1, &vbo_);
+        if (vao_) glDeleteVertexArrays(1, &vao_);
+        vao_ = vbo_ = 0;
+        return;
+    }
+    uploaded_ = true;
 }
 void MeshGL3::draw() {
     if (!owns_context() || !uploaded_) return;
