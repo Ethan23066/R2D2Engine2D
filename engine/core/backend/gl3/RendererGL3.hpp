@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mutex>
 #include <thread>
 
 class RendererGL3 {
@@ -17,9 +16,10 @@ public:
     bool is_current_thread_owner() const noexcept;
 
 private:
+    // OpenGL state is thread-confined: all access must happen on owner_thread_.
+    // A mutex here would serialize calls without making a context portable.
     void* window = nullptr;
     int width = 0;
     int height = 0;
     std::thread::id owner_thread_{};
-    mutable std::mutex gl_mutex_;
 };
