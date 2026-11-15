@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mutex>
 #include <thread>
 
 struct ShaderGL3 {
@@ -14,8 +13,8 @@ struct ShaderGL3 {
     bool owns_context() const noexcept;
 
 private:
+    // OpenGL objects are only accessed from the context-owning thread.
     std::thread::id owner_thread_{};
-    mutable std::mutex gl_mutex_;
     unsigned int program_{0};
     bool compiled_{false};
 };
