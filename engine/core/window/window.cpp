@@ -38,12 +38,13 @@ bool WindowState::is_owner_thread() const noexcept {
 
 } // namespace r2d2
 
+// GLFW window operations are confined to the thread that created the window.
+// Avoid taking a global mutex for every poll/close/swap operation.
 static std::unique_ptr<r2d2::GlfwWindow> g_window_ptr = nullptr;
-static std::mutex g_window_mutex;
 
 int engine_window_select_monitor(const EngineMonitorMode* modes, int count)
 {
-    if (count <= 0)
+    if (!modes || count <= 0)
         return 0;
 
     if (count == 2)
@@ -53,7 +54,7 @@ int engine_window_select_monitor(const EngineMonitorMode* modes, int count)
     int best_area = modes[0].width * modes[0].height;
 
     for (int i = 1; i < count; ++i) {
-        int area = modes[i].width * modes[i].height;
+        const int area = modes[i].width * modes[i].height;
         if (area > best_area) {
             best_area = area;
             best_index = i;
@@ -65,12 +66,11 @@ int engine_window_select_monitor(const EngineMonitorMode* modes, int count)
 
 int engine_window_init(const EngineWindowConfig* cfg, int monitor_index)
 {
-    if (!cfg)
+    if (!cfg || g_window_ptr)
         return 0;
 
-    std::scoped_lock lock(g_window_mutex);
-
-    g_window_ptr = r2d2::GlfwWindow::create(cfg->width, cfg->height, cfg->title, cfg->fullscreen, cfg->resizable, monitor_index);
+    g_window_ptr = r2d2::GlfwWindow::create(cfg->width, cfg->height, cfg->title,
+                                             cfg->fullscreen, cfg->resizable, monitor_index);
     if (!g_window_ptr) {
         std::cerr << "Failed to create GLFW window\n";
         return 0;
@@ -81,14 +81,13 @@ int engine_window_init(const EngineWindowConfig* cfg, int monitor_index)
 
 void engine_window_run()
 {
-    while (!engine_window_should_close()) {
-        engine_window_poll_events();
-    }
+    // This helper has no per-frame rendering; block instead of busy-spinning.
+    while (!engine_window_should_close())
+        glfwWaitEvents();
 }
 
 bool engine_window_should_close()
 {
-    std::scoped_lock lock(g_window_mutex);
     if (!g_window_ptr)
         return true;
 
@@ -101,7 +100,6 @@ bool engine_window_should_close()
 
 void engine_window_swap_buffers()
 {
-    std::scoped_lock lock(g_window_mutex);
     if (g_window_ptr)
         g_window_ptr->swap_buffers();
 }
@@ -113,14 +111,10 @@ void engine_window_poll_events()
 
 void engine_window_shutdown()
 {
-    std::scoped_lock lock(g_window_mutex);
     g_window_ptr.reset();
 }
 
 void* engine_window_get_native_handle()
 {
-    std::scoped_lock lock(g_window_mutex);
-    if (!g_window_ptr)
-        return nullptr;
-    return g_window_ptr->native_handle();
+    return g_window_ptr ? g_window_ptr->native_handle() : nullptr;
 }
