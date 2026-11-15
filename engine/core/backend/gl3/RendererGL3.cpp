@@ -9,24 +9,25 @@
 RendererGL3::RendererGL3() = default;
 
 void RendererGL3::set_context_owner(std::thread::id owner) noexcept {
-    std::scoped_lock lock(gl_mutex_);
     owner_thread_ = owner;
 }
 
 bool RendererGL3::owns_context() const noexcept {
-    const auto current = std::this_thread::get_id();
-    std::scoped_lock lock(gl_mutex_);
-    return owner_thread_ == std::thread::id{} || owner_thread_ == current;
+    return owner_thread_ == std::thread::id{} ||
+           owner_thread_ == std::this_thread::get_id();
+}
+
+bool RendererGL3::is_current_thread_owner() const noexcept {
+    return owns_context();
 }
 
 int RendererGL3::init(void* win, int w, int h)
 {
-    if (!win) {
-        std::cerr << "Renderer init: null window handle\n";
+    if (!win || w <= 0 || h <= 0) {
+        std::cerr << "Renderer init: invalid window or dimensions\n";
         return 0;
     }
 
-    std::scoped_lock lock(gl_mutex_);
     window = win;
     width = w;
     height = h;
@@ -37,6 +38,7 @@ int RendererGL3::init(void* win, int w, int h)
 
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         std::cerr << "Failed to load OpenGL via GLAD\n";
+        window = nullptr;
         return 0;
     }
 
@@ -46,12 +48,11 @@ int RendererGL3::init(void* win, int w, int h)
 
 void RendererGL3::begin_frame(float r, float g, float b, float a)
 {
+    // The context and renderer are owned by one thread; no per-frame mutex.
     if (!window || !owns_context())
         return;
 
-    std::scoped_lock lock(gl_mutex_);
     GLFWwindow* glfw_window = static_cast<GLFWwindow*>(window);
-
     int framebuffer_width = 0;
     int framebuffer_height = 0;
     glfwGetFramebufferSize(glfw_window, &framebuffer_width, &framebuffer_height);
@@ -71,13 +72,16 @@ void RendererGL3::end_frame()
     if (!window || !owns_context())
         return;
 
-    std::scoped_lock lock(gl_mutex_);
     glfwSwapBuffers(static_cast<GLFWwindow*>(window));
 }
 
 void RendererGL3::shutdown()
 {
-    std::scoped_lock lock(gl_mutex_);
+    if (!owns_context())
+        return;
+
     window = nullptr;
+    width = 0;
+    height = 0;
     owner_thread_ = std::thread::id{};
 }
