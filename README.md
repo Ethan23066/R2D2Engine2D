@@ -1,84 +1,158 @@
-# R2D2Engine2D (branche `testing-cmake-migration`)
+# R2D2Engine2D
 
-R2D2Engine2D est en migration vers une architecture native C++23 avec rendu OpenGL 3, fenêtre GLFW native, build CMake, et bindings Python optionnels via nanobind.
+R2D2Engine2D est un moteur 2D en cours de développement. Cette branche correspond à la migration vers un cœur natif en C++23, avec un backend graphique OpenGL, une gestion des fenêtres via GLFW et une API Python optionnelle basée sur nanobind.
 
-## Architecture actuelle
+Le projet évolue encore : certaines parties sont des prototypes et toutes les fonctionnalités annoncées dans l'architecture ne sont pas encore implémentées. Cette documentation distingue donc les éléments présents dans le code de ceux qui restent à développer.
 
-- **Cœur natif :** `engine/core` (C++23 + C/GLAD)
-- **Rendu :** OpenGL 3 (`RendererGL3`)
-- **Fenêtrage :** GLFW natif (pas de pyglfw)
-- **Bindings Python :** module optionnel **`_r2d2`** (nanobind)
-- **Build system principal :** CMake
-- **Exécutable démo :** `r2d2_demo` (optionnel)
-- **Tests :** CTest (`r2d2_performance_test`)
+## État du projet
 
-## Dépendances Linux
+| Partie | État |
+|---|---|
+| Cœur natif C++23 | En développement |
+| Configuration et compilation CMake | Présentes |
+| Fenêtrage GLFW | Présent |
+| Backend OpenGL | En développement |
+| Bindings Python avec nanobind | Optionnels |
+| Démo native | Optionnelle, selon la présence de sa source |
+| Tests CTest | Un test de profil de performance est déclaré |
 
-Ubuntu/Debian :
+## Organisation du dépôt
+
+- `engine/core/` : code du moteur natif.
+- `engine/core/backend/gl3/` : backend graphique OpenGL.
+- `engine/core/window/` : gestion des fenêtres GLFW.
+- `bindings/` : bindings Python.
+- `examples/` : exemples et démo native.
+- `tests/` : tests du projet.
+
+## Prérequis
+
+La configuration CMake utilise :
+
+- un compilateur C et C++ prenant en charge C23 et C++23 ;
+- CMake 3.20 ou plus récent ;
+- pkg-config ;
+- GLFW 3 ;
+- les bibliothèques de développement OpenGL ;
+- les bibliothèques de threads du système.
+
+### Debian / Ubuntu
+
+Pour compiler le cœur natif et la démo :
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev python3-dev
+sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev
 ```
 
-## Build CMake
+Pour construire également les bindings Python, cette branche configure nanobind avec l'ABI Free-Threaded de Python 3.14. Il faut donc disposer d'une installation Python 3.14 Free-Threaded compatible, avec ses fichiers de développement. La configuration récupère nanobind depuis son dépôt Git lors du build.
 
-Depuis la racine du dépôt :
+Les noms des paquets Python et leur disponibilité dépendent de la distribution et de la façon dont Python 3.14t a été installé.
+
+## Compilation
+
+### Cœur natif et démo, sans bindings Python
+
+Cette option permet de compiler le moteur sans dépendre de l'installation Python Free-Threaded :
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=OFF -DBUILD_DEMO=ON
+cmake --build build --parallel
+```
+
+### Avec les bindings Python
+
+Si Python 3.14 Free-Threaded et ses fichiers de développement sont installés :
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=ON -DBUILD_DEMO=ON
 cmake --build build --parallel
 ```
 
-Options CMake disponibles :
+### Options CMake
 
-- `BUILD_PY_BINDINGS` (`ON` par défaut) : construit le module Python `_r2d2`
-- `BUILD_DEMO` (`ON` par défaut) : construit `r2d2_demo`
+| Option | Valeur par défaut | Description |
+|---|---:|---|
+| `BUILD_PY_BINDINGS` | `ON` | Construit le module Python `_r2d2`. |
+| `BUILD_DEMO` | `ON` | Construit `r2d2_demo` si `examples/demo/main.cpp` existe. |
 
-## Exécuter la démo native
+Le test de performance est déclaré séparément et est ajouté à CTest.
+
+## Exécution
+
+Si la cible de démo a été construite :
 
 ```bash
 ./build/r2d2_demo
 ```
 
-## Exécuter les tests
+Si les bindings Python ont été construits, le module `_r2d2` doit être accessible depuis l'environnement Python utilisé :
+
+```python
+import _r2d2
+```
+
+## Tests
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-## API Python réellement exposée (`bindings/bindings.cpp`)
+Le résultat des tests dépend des cibles effectivement configurées et compilées.
 
-Le module construit est **`_r2d2`** et expose actuellement :
+## API Python actuellement déclarée
 
-- `_r2d2.Window`
-  - constructeur : `Window(width, height, title="R2D2", fullscreen=False, resizable=True)`
-  - méthodes : `swap_buffers()`, `poll_events()`, `should_close()`, `run()`, `native_handle()`
-- `_r2d2.Lifecycle`
-  - méthodes : `init()`, `update()`, `shutdown()`, `is_running()`
-- `_r2d2.RendererGL3`
-  - méthodes : `init(width, height)`, `begin_frame(r, g, b, a)`, `end_frame()`, `shutdown()`
+Le module `_r2d2` est défini dans `bindings/bindings.cpp`. Il expose actuellement :
 
-Note importante : `RendererGL3.init` récupère le handle natif via `engine_window_get_native_handle()` ; la signature Python est donc bien `init(width, height)`.
+- `Window(width, height, title="R2D2", fullscreen=False, resizable=True)`
+  - `swap_buffers()`
+  - `poll_events()`
+  - `should_close()`
+  - `run()`
+  - `native_handle()`
+- Fonctions de cycle de vie :
+  - `init()`
+  - `update()`
+  - `shutdown()`
+  - `is_running()`
+- `RendererGL3()`
+  - `init(width, height)`
+  - `begin_frame(r, g, b, a)`
+  - `end_frame()`
+  - `shutdown()`
+- `ShaderGL3()`
+  - `load(vs_path, fs_path)`
+  - `use()`
+- `Texture()`
+  - `load(path)`
+  - `bind(unit)`
+- `MeshGL3()`
+  - `upload()`
+  - `draw()`
 
-## Règles threading / OpenGL
+Cette liste décrit les interfaces déclarées, pas une garantie que chaque fonctionnalité soit déjà complète.
 
-- Les appels OpenGL doivent être effectués sur le thread propriétaire du contexte.
-- `RendererGL3` stocke un thread propriétaire lors de `init`.
-- `begin_frame()` et `end_frame()` retournent sans action si le thread courant n’est pas propriétaire.
-- `RendererGL3.end_frame()` effectue déjà le swap (`glfwSwapBuffers`) : éviter un second swap dans la même frame.
+## État des fonctionnalités graphiques
 
-## État actuel / roadmap courte
+Le backend OpenGL est en cours de construction :
 
-État actuel :
+- Le renderer initialise le contexte et gère le début et la fin d'une frame.
+- Le chargement des shaders lit les fichiers, compile les deux étapes et vérifie leur linkage.
+- Le mesh actuel est un prototype : il crée ses objets OpenGL, mais ne reçoit pas encore de données de sommets.
+- Le chargement des textures n'est pas encore implémenté. En l'absence de décodeur d'image, `Texture.load()` retourne actuellement `False`.
 
-- base CMake + nanobind fonctionnelle
-- fenêtre GLFW native
-- boucle démo native
-- tests CTest de base
+Les ressources OpenGL doivent être utilisées et détruites pendant que leur contexte est valide et sur le thread qui possède ce contexte.
 
-Roadmap proche :
+## Threads et contexte OpenGL
 
-1. enrichir l’API native/py (`Texture`, `Mesh`, `Shader`, entrées)
-2. renforcer les tests CTest
-3. stabiliser l’API publique et la documentation
+Le projet peut évoluer vers différentes organisations de threads selon les besoins du moteur et des applications qui l'utilisent. Cette branche ne fixe pas de nombre universel de threads pour tous les jeux.
+
+Une contrainte vient toutefois d'OpenGL : un contexte doit être courant sur le thread qui effectue les appels graphiques. Les appels GLFW liés à la fenêtre et aux événements doivent également respecter les règles de thread de GLFW.
+
+Le nombre de workers, leur répartition et les stratégies de parallélisation restent des choix d'architecture susceptibles d'évoluer avec les mesures et les besoins.
+
+## Contribution
+
+Les contributions, retours, propositions et choix d'architecture alternatifs sont les bienvenus. Les préférences d'utilisation ou de développement ne constituent pas des règles universelles : les décisions techniques peuvent être discutées en fonction de leurs avantages, de leurs contraintes et de leur impact sur le projet.
+
+Avant de proposer une fonctionnalité, il est utile de préciser son état d'avancement, ses dépendances et les plateformes concernées.
