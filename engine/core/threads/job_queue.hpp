@@ -1,67 +1,44 @@
 #pragma once
-
-#include <atomic>
 #include <condition_variable>
-#include <functional>
 #include <mutex>
 #include <queue>
-#include <thread>
 #include <utility>
-
 namespace r2d2 {
-
-template <typename T>
-class ThreadSafeQueue {
+// close() wakes waiters; queued items remain readable. reset() requires no active consumers.
+template<class T> class ThreadSafeQueue {
 public:
     ThreadSafeQueue() = default;
-
-    void push(T value) {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            queue_.push(std::move(value));
-        }
-        cond_.notify_one();
+    ThreadSafeQueue(const ThreadSafeQueue&) = delete;
+    ThreadSafeQueue& operator=(const ThreadSafeQueue&) = delete;
+    bool push(T value) {
+        { std::lock_guard<std::mutex> lock(mutex_); if (closed_) return false; queue_.push(std::move(value)); }
+        cond_.notify_one(); return true;
     }
-
     bool try_pop(T& value) {
         std::lock_guard<std::mutex> lock(mutex_);
-        if (queue_.empty())
-            return false;
-
-        value = std::move(queue_.front());
-        queue_.pop();
-        return true;
+        if (queue_.empty()) return false;
+        value = std::move(queue_.front()); queue_.pop(); return true;
     }
-
     bool wait_pop(T& value) {
         std::unique_lock<std::mutex> lock(mutex_);
-        cond_.wait(lock, [this] { return !queue_.empty() || shutdown_; });
-        if (queue_.empty())
-            return false;
-
-        value = std::move(queue_.front());
-        queue_.pop();
-        return true;
+        cond_.wait(lock, [this] { return closed_ || !queue_.empty(); });
+        if (queue_.empty()) return false;
+        value = std::move(queue_.front()); queue_.pop(); return true;
     }
-
-    void shutdown() {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            shutdown_ = true;
-        }
+    void close() noexcept {
+        { std::lock_guard<std::mutex> lock(mutex_); closed_ = true; }
         cond_.notify_all();
     }
-
-    bool empty() const {
+    void reset() {
         std::lock_guard<std::mutex> lock(mutex_);
-        return queue_.empty();
+        while (!queue_.empty()) queue_.pop();
+        closed_ = false;
     }
-
+    bool empty() const { std::lock_guard<std::mutex> lock(mutex_); return queue_.empty(); }
 private:
     mutable std::mutex mutex_;
     std::condition_variable cond_;
     std::queue<T> queue_;
-    bool shutdown_ = false;
+    bool closed_{false};
 };
-
 } // namespace r2d2
