@@ -5,7 +5,6 @@
 #include <iterator>
 #include <string>
 #include <thread>
-
 namespace {
 bool read_text_file(const char* path, std::string& output) {
     if (!path || !*path) return false;
@@ -14,11 +13,10 @@ bool read_text_file(const char* path, std::string& output) {
     output.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
     return file.good() || file.eof();
 }
-
 bool compile_shader(GLuint shader, const std::string& source, const char* label) {
-    const char* text = source.c_str();
+    const char* source_ptr = source.c_str();
     const GLint length = static_cast<GLint>(source.size());
-    glShaderSource(shader, 1, &text, &length);
+    glShaderSource(shader, 1, &source_ptr, &length);
     glCompileShader(shader);
     GLint status = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -31,26 +29,22 @@ bool compile_shader(GLuint shader, const std::string& source, const char* label)
     return false;
 }
 }
-
 ShaderGL3::~ShaderGL3() {
-    // GL resources must be destroyed before their context is destroyed.
+    // Shader objects must be destroyed before the owning GL context.
     if (program_ && owns_context()) glDeleteProgram(program_);
 }
-
 void ShaderGL3::set_context_owner(std::thread::id owner) noexcept { owner_thread_ = owner; }
-
 bool ShaderGL3::owns_context() const noexcept {
     return owner_thread_ == std::thread::id{} || owner_thread_ == std::this_thread::get_id();
 }
-
 bool ShaderGL3::load(const char* vs_path, const char* fs_path) {
     if (!owns_context()) return false;
+    if (owner_thread_ == std::thread::id{}) owner_thread_ = std::this_thread::get_id();
     std::string vs_source, fs_source;
     if (!read_text_file(vs_path, vs_source) || !read_text_file(fs_path, fs_source)) {
         std::cerr << "Unable to read shader source files\n";
         return false;
     }
-
     const GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     const GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     if (!vs || !fs) {
@@ -58,27 +52,17 @@ bool ShaderGL3::load(const char* vs_path, const char* fs_path) {
         if (fs) glDeleteShader(fs);
         return false;
     }
-
     const bool vertex_ok = compile_shader(vs, vs_source, vs_path);
     const bool fragment_ok = compile_shader(fs, fs_source, fs_path);
     if (!vertex_ok || !fragment_ok) {
-        glDeleteShader(vs);
-        glDeleteShader(fs);
-        return false;
+        glDeleteShader(vs); glDeleteShader(fs); return false;
     }
-
     const GLuint candidate = glCreateProgram();
-    if (!candidate) {
-        glDeleteShader(vs);
-        glDeleteShader(fs);
-        return false;
-    }
+    if (!candidate) { glDeleteShader(vs); glDeleteShader(fs); return false; }
     glAttachShader(candidate, vs);
     glAttachShader(candidate, fs);
     glLinkProgram(candidate);
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
+    glDeleteShader(vs); glDeleteShader(fs);
     GLint linked = GL_FALSE;
     glGetProgramiv(candidate, GL_LINK_STATUS, &linked);
     if (linked != GL_TRUE) {
@@ -90,13 +74,11 @@ bool ShaderGL3::load(const char* vs_path, const char* fs_path) {
         glDeleteProgram(candidate);
         return false;
     }
-
     if (program_) glDeleteProgram(program_);
     program_ = candidate;
     compiled_ = true;
     return true;
 }
-
 void ShaderGL3::use() {
     if (owns_context() && compiled_ && program_) glUseProgram(program_);
 }
