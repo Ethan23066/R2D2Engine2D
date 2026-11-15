@@ -151,8 +151,10 @@ Une contrainte vient toutefois d'OpenGL : un contexte doit être courant sur le 
 
 Le nombre de workers, leur répartition et les stratégies de parallélisation restent des choix d'architecture susceptibles d'évoluer avec les mesures et les besoins.
 
-## Contribution
+## Forks et modifications personnelles
 
-Les contributions, retours, propositions et choix d'architecture alternatifs sont les bienvenus. Les préférences d'utilisation ou de développement ne constituent pas des règles universelles : les décisions techniques peuvent être discutées en fonction de leurs avantages, de leurs contraintes et de leur impact sur le projet.
+Le dépôt officiel n'accepte pas de contributions externes ni de pull requests.
 
-Avant de proposer une fonctionnalité, il est utile de préciser son état d'avancement, ses dépendances et les plateformes concernées.
+Toute personne souhaitant modifier le moteur ou expérimenter une autre direction doit d'abord créer son propre fork. Les modifications et évolutions peuvent ensuite être réalisées librement dans ce fork, indépendamment du dépôt officiel.
+
+Cette règle permet de conserver une direction cohérente pour le projet officiel, sans empêcher les autres développeurs d'adapter le moteur à leurs besoins.
