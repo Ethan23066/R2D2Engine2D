@@ -16,8 +16,7 @@ public:
     bool is_current_thread_owner() const noexcept;
 
 private:
-    // OpenGL state is thread-confined: all access must happen on owner_thread_.
-    // A mutex here would serialize calls without making a context portable.
+    // OpenGL calls and context transitions are confined to this thread.
     void* window = nullptr;
     int width = 0;
     int height = 0;

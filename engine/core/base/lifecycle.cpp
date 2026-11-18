@@ -9,14 +9,14 @@ void Lifecycle::init() {
 }
 
 void Lifecycle::update() {
-    // plus tard : update du monde, ECS, physics, etc.
+    // TODO: world, ECS and physics updates.
 }
 
 void Lifecycle::shutdown() {
     running_.store(false, std::memory_order_release);
 }
 
-uint8_t Lifecycle::is_running() const {
+std::uint8_t Lifecycle::is_running() const {
     return running_.load(std::memory_order_acquire) ? 1U : 0U;
 }
 
