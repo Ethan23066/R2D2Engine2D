@@ -1,5 +1,6 @@
 #include "glfw_raii.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <stdexcept>
 
@@ -19,9 +20,8 @@ GlfwInit::~GlfwInit() {
 }
 
 GlfwInit& GlfwInit::instance() {
-    // GLFW must outlive every static window wrapper. Keep the process-wide
-    // initializer alive until process termination to avoid static destruction
-    // order calling glfwTerminate() before a global window is destroyed.
+    // Keep GLFW alive until process termination: static destruction must not
+    // call glfwTerminate() before a global window wrapper is destroyed.
     static GlfwInit* instance = new GlfwInit();
     return *instance;
 }
@@ -32,12 +32,10 @@ GlfwWindow::GlfwWindow(GLFWwindow* w) noexcept
 GlfwWindow::~GlfwWindow() {
     if (!window_)
         return;
-
     if (!owns_current_thread()) {
         std::cerr << "GlfwWindow destroyed from a non-owner thread; window was not destroyed\n";
         return;
     }
-
     glfwDestroyWindow(window_);
     window_ = nullptr;
 }

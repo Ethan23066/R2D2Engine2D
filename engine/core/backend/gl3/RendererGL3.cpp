@@ -11,12 +11,6 @@
 
 RendererGL3::RendererGL3() = default;
 
-RendererGL3::~RendererGL3() {
-    // RAII fallback. Explicit shutdown remains preferable so its thread/context
-    // requirements are visible at the call site.
-    shutdown();
-}
-
 void RendererGL3::set_context_owner(std::thread::id owner) noexcept {
     owner_thread_ = owner;
 }
