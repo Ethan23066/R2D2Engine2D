@@ -5,6 +5,10 @@
 class RendererGL3 {
 public:
     RendererGL3();
+    ~RendererGL3();
+
+    RendererGL3(const RendererGL3&) = delete;
+    RendererGL3& operator=(const RendererGL3&) = delete;
 
     int init(void* win, int w, int h);
     void begin_frame(float r, float g, float b, float a);

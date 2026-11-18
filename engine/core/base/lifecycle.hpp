@@ -1,13 +1,12 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 
 namespace r2d2 {
-
 class Lifecycle {
 public:
     Lifecycle();
-
     Lifecycle(const Lifecycle&) = delete;
     Lifecycle& operator=(const Lifecycle&) = delete;
     Lifecycle(Lifecycle&&) = delete;
@@ -16,10 +15,9 @@ public:
     void init();
     void update();
     void shutdown();
-    uint8_t is_running() const;
+    std::uint8_t is_running() const;
 
 private:
     std::atomic<bool> running_{false};
 };
-
 } // namespace r2d2

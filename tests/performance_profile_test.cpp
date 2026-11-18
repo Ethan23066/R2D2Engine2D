@@ -1,7 +1,9 @@
 #include <iostream>
+#include <thread>
 
 #include "engine/core/performance/performance_profile.hpp"
 #include "engine/core/threads/job_queue.hpp"
+#include "engine/core/window/window.hpp"
 
 #define CHECK(condition) \
     do { \
@@ -57,6 +59,27 @@ int main() {
         CHECK(queue.wait_pop(value));
         CHECK(value == 7);
         CHECK(!queue.wait_pop(value));
+    }
+
+    {
+        r2d2::ThreadSafeQueue<int> queue;
+        int value = -1;
+        std::thread producer([&queue] { queue.push(99); });
+        const bool received = queue.wait_pop(value);
+        producer.join();
+        CHECK(received);
+        CHECK(value == 99);
+    }
+
+    {
+        const EngineMonitorMode modes[] = {
+            {1280, 720, 60},
+            {1920, 1080, 60},
+            {1600, 900, 75}
+        };
+        CHECK(engine_window_select_monitor(modes, 3) == 1);
+        CHECK(engine_window_select_monitor(nullptr, 3) == 0);
+        CHECK(engine_window_select_monitor(modes, 0) == 0);
     }
 
     std::cout << "r2d2_performance_test: OK\n";
