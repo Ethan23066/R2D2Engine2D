@@ -1,19 +1,28 @@
-# MIGRATION_CMAKE.md
+# Migration CMake — état de la branche
 
-Ce document décrit l’état **réel** de la branche `testing-cmake-migration`.
+Ce document décrit la configuration de la branche `testing-cmake-migration`.
 
-## 1) Dépendances Linux
+## 1. Dépendances Linux
 
-Ubuntu/Debian :
+Pour le cœur natif (Debian / Ubuntu) :
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev python3-dev
+sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev
 ```
 
-## 2) Configuration / build
+Pour les bindings, installer séparément Python 3.14 Free-Threaded avec ses fichiers de développement. CMake 3.30 ou plus récent est requis pour sélectionner explicitement l'ABI Free-Threaded via `Python_FIND_ABI`.
 
-Depuis la racine du dépôt :
+## 2. Configuration / build
+
+Cœur natif :
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=OFF -DBUILD_DEMO=ON
+cmake --build build --parallel
+```
+
+Avec bindings Python 3.14t :
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=ON -DBUILD_DEMO=ON
@@ -24,65 +33,33 @@ Options :
 
 - `BUILD_PY_BINDINGS=ON|OFF`
 - `BUILD_DEMO=ON|OFF`
+- `BUILD_TESTING=ON|OFF`
 
-Cibles actuelles :
+## 3. Cibles actuelles
 
-- `_r2d2` (module Python nanobind, optionnel)
-- `r2d2_demo` (démo native, optionnelle)
-- `r2d2_performance_test` (test CTest)
+- `r2d2_core` : bibliothèque statique du moteur.
+- `_r2d2` : module Python nanobind, si `BUILD_PY_BINDINGS=ON`.
+- `r2d2_demo` : démo native si `examples/demo/main.cpp` existe.
+- `r2d2_performance_test` : test CTest si `BUILD_TESTING=ON`.
 
-> Remarque : il n’existe pas de cible `r2d2_core` dans l’état actuel.
+## 4. API et cycle de rendu
 
-## 3) API bindings exposée
-
-Le module Python est nommé **`_r2d2`** (pas `r2d2`).
-
-Classes exposées (`bindings/bindings.cpp`) :
-
-- `_r2d2.Window`
-- `_r2d2.Lifecycle`
-- `_r2d2.RendererGL3`
-
-Signature Python actuelle de `RendererGL3.init` :
+Le module Python s'appelle `_r2d2`. Le renderer récupère le handle de la fenêtre via `engine_window_get_native_handle()` et expose :
 
 ```python
 renderer.init(width, height)
+renderer.begin_frame(0.0, 0.0, 0.0, 1.0)
+renderer.end_frame()
 ```
 
-(Le handle natif est récupéré en interne via `engine_window_get_native_handle()`.)
+`end_frame()` effectue déjà le swap des buffers : ne pas appeler également `Window.swap_buffers()` pour la même frame.
 
-## 4) Rendu et swap des buffers
+## 5. Threads et ressources OpenGL
 
-Boucle native de référence (voir `examples/demo/main.cpp`) :
+- Les appels GLFW liés à la fenêtre et aux événements doivent rester sur le thread propriétaire.
+- Une fermeture demandée depuis un autre thread est mise en attente ; le thread propriétaire la traite au prochain événement.
+- Le renderer enregistre le thread et la fenêtre du contexte OpenGL.
+- Les ressources shader, mesh et texture refusent les opérations sans le contexte attendu.
+- Les ressources doivent être détruites avant `RendererGL3.shutdown()`.
 
-```cpp
-while (!engine_window_should_close()) {
-    engine_window_poll_events();
-    renderer.begin_frame(...);
-    renderer.end_frame();
-}
-```
-
-`RendererGL3.end_frame()` appelle déjà `glfwSwapBuffers(...)`.
-Il ne faut donc pas ajouter un second `swap_buffers()` dans la même frame.
-
-## 5) Threading / contexte OpenGL
-
-- Les appels OpenGL doivent rester sur le thread propriétaire du contexte.
-- Le propriétaire est fixé pendant `RendererGL3::init(...)`.
-- `begin_frame()`/`end_frame()` sortent sans action si le thread courant n’est pas propriétaire.
-- Aucune étape `make_current()` n’est exposée dans l’API Python actuelle.
-
-## 6) Exécution
-
-Demo native :
-
-```bash
-./build/r2d2_demo
-```
-
-Tests :
-
-```bash
-ctest --test-dir build --output-on-failure
-```
+Le mesh ne possède pas encore d'API de données de sommets, et le chargement des textures attend encore un décodeur d'image. Ces fonctionnalités ne sont pas présentées comme opérationnelles.
