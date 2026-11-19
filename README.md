@@ -12,7 +12,7 @@ Le projet évolue encore : certaines parties sont des prototypes et toutes les f
 | Configuration et compilation CMake | Présentes |
 | Fenêtrage GLFW | Présent |
 | Backend OpenGL 3.1 | Prototype en développement |
-| Bindings Python avec nanobind | Optionnels, ABI Free-Threaded |
+| Bindings Python avec nanobind | Optionnels, Free-Threaded préféré, GIL en repli |
 | Démo native | Optionnelle, selon la présence de sa source |
 | Tests CTest | Profil de performances et file de tâches |
 
@@ -39,8 +39,8 @@ Pour le cœur natif :
 
 Pour les bindings Python :
 
-- CMake 3.30 ou plus récent (détection explicite de l'ABI Free-Threaded) ;
-- Python 3.14 Free-Threaded et ses fichiers de développement ;
+- Python 3.12 ou plus récent et ses fichiers de développement ;
+- si Python 3.13+ Free-Threaded est disponible avec CMake 3.30+, cette ABI est préférée ; sinon l'ABI Python classique avec GIL est utilisée ;
 - nanobind 3.1.0, récupéré à une version Git précise par CMake.
 
 ### Debian / Ubuntu
@@ -52,22 +52,22 @@ sudo apt update
 sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev
 ```
 
-Python 3.14t doit être installé séparément avec ses fichiers de développement. Les paquets disponibles dépendent de la distribution et de la méthode d'installation de Python.
+Python 3.12+ doit être installé avec ses fichiers de développement. Python Free-Threaded 3.13+ est utilisé en priorité lorsqu'il est détecté par CMake 3.30+ ; sinon le build utilise l'ABI standard avec GIL.
 
 ## Compilation
 
 ### Cœur natif et démo, sans bindings Python
 
-Cette configuration ne recherche pas Python et peut être utilisée sur les machines qui ne disposent pas de Python Free-Threaded :
+Cette configuration ne recherche pas Python et peut être utilisée sur les machines sans environnement Python de développement :
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=OFF -DBUILD_DEMO=ON
 cmake --build build --parallel
 ```
 
-### Avec les bindings Python Free-Threaded
+### Avec les bindings Python
 
-Avec CMake 3.30+ et Python 3.14t :
+CMake sélectionne automatiquement Python Free-Threaded 3.13+ si disponible (CMake 3.30+), puis revient à Python standard avec GIL (Python 3.12+ minimum) :
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=ON -DBUILD_DEMO=ON
