@@ -14,12 +14,13 @@ include(GNUInstallDirs)
 include(CTest)
 include(FetchContent)
 
-option(BUILD_PY_BINDINGS "Build Python bindings (Free-Threaded preferred, GIL fallback)" ON)
+option(BUILD_PY_BINDINGS "Build Python bindings with Python 3.12 (GIL ABI)" ON)
 option(BUILD_DEMO "Build demo executable when its source is available" ON)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
-find_package(OpenGL REQUIRED)
+pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3>=3.3)
+pkg_check_modules(EGL REQUIRED IMPORTED_TARGET egl)
+pkg_check_modules(GLESV2 REQUIRED IMPORTED_TARGET glesv2)
 find_package(Threads REQUIRED)
 
 # Core native library
@@ -28,6 +29,10 @@ file(GLOB_RECURSE ENGINE_CPP_SRCS CONFIGURE_DEPENDS
 file(GLOB_RECURSE ENGINE_C_SRCS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/engine/core/*.c")
 list(REMOVE_DUPLICATES ENGINE_C_SRCS)
+
+# The GLES backend uses platform GLES3 entry points directly, not desktop GLAD.
+list(REMOVE_ITEM ENGINE_C_SRCS
+    "${CMAKE_CURRENT_SOURCE_DIR}/engine/core/backend/gl3/glad/glad.c")
 
 add_library(r2d2_core STATIC
     ${ENGINE_CPP_SRCS}
@@ -44,44 +49,24 @@ target_include_directories(r2d2_core PUBLIC
 target_compile_features(r2d2_core PUBLIC cxx_std_23)
 target_link_libraries(r2d2_core PUBLIC
     PkgConfig::GLFW
-    OpenGL::GL
+    PkgConfig::EGL
+    PkgConfig::GLESV2
     Threads::Threads
 )
 
-# Prefer the Free-Threaded CPython ABI whenever CMake can detect it.
-# CMake 3.30 added the fourth Python_FIND_ABI flag (gil_disabled).
+target_compile_definitions(r2d2_core PRIVATE R2D2_USE_GLES=1)
+
+
+# ARM target: use the regular GIL-enabled Python 3.12+ ABI.
 if(BUILD_PY_BINDINGS)
-    set(R2D2_PYTHON_FREE_THREADED OFF)
-
-    if(NOT CMAKE_VERSION VERSION_LESS 3.30)
-        set(Python_FIND_STRATEGY LOCATION)
-        set(Python_FIND_ABI "OFF" "ANY" "ANY" "ON")
-        find_package(Python 3.13 QUIET COMPONENTS Interpreter Development.Module)
-
-        if(Python_FOUND)
-            set(R2D2_PYTHON_FREE_THREADED ON)
-            message(STATUS "Python Free-Threaded ABI selected: ${Python_EXECUTABLE} (${Python_VERSION})")
-        endif()
-    endif()
-
-    # Fallback to the regular GIL-enabled ABI when no compatible free-threaded
-    # interpreter/development module is installed (or CMake is too old to detect it).
-    if(NOT R2D2_PYTHON_FREE_THREADED)
-        unset(Python_EXECUTABLE CACHE)
-        unset(Python_INCLUDE_DIR CACHE)
-        unset(Python_LIBRARY CACHE)
-        unset(Python_SABI_LIBRARY CACHE)
-        if(NOT CMAKE_VERSION VERSION_LESS 3.30)
-            set(Python_FIND_ABI "OFF" "ANY" "ANY" "OFF")
-        else()
-            set(Python_FIND_ABI "OFF" "ANY" "ANY")
-        endif()
-        find_package(Python 3.12 REQUIRED COMPONENTS Interpreter Development.Module)
-        message(STATUS "Python GIL-enabled ABI selected as fallback: ${Python_EXECUTABLE} (${Python_VERSION})")
-    endif()
+    set(Python_FIND_STRATEGY LOCATION)
+    set(Python_FIND_ABI "OFF" "ANY" "ANY")
+    find_package(Python 3.12 REQUIRED COMPONENTS Interpreter Development.Module)
 
     message(STATUS "Python interpreter: ${Python_EXECUTABLE}")
     message(STATUS "Python version: ${Python_VERSION}")
+    message(STATUS "Python GIL-enabled ABI selected for ARM.")
+
 
     # Pin the dependency: never build against a moving master branch.
     FetchContent_Declare(
@@ -99,18 +84,10 @@ if(BUILD_PY_BINDINGS)
 
     FetchContent_MakeAvailable(nanobind)
 
-    if(R2D2_PYTHON_FREE_THREADED)
-        nanobind_add_module(_r2d2
-            NB_SHARED
-            FREE_THREADED
-            bindings/bindings.cpp
-        )
-    else()
-        nanobind_add_module(_r2d2
-            NB_SHARED
-            bindings/bindings.cpp
-        )
-    endif()
+    nanobind_add_module(_r2d2
+        NB_SHARED
+        bindings/bindings.cpp
+    )
 
     target_link_libraries(_r2d2 PRIVATE r2d2_core)
     set_target_properties(_r2d2 PROPERTIES
