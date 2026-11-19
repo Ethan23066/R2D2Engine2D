@@ -1,6 +1,6 @@
 # R2D2Engine2D
 
-R2D2Engine2D est un moteur 2D en cours de développement. Cette branche prépare un cœur natif en C++23, un backend graphique OpenGL, le fenêtrage GLFW et une API Python optionnelle basée sur nanobind.
+R2D2Engine2D est un moteur 2D en cours de développement. Cette branche prépare un cœur natif en C++23, un backend graphique OpenGL ES 3.0 via EGL, le fenêtrage GLFW et une API Python optionnelle basée sur nanobind.
 
 Le projet évolue encore : certaines parties sont des prototypes et toutes les fonctionnalités annoncées dans l'architecture ne sont pas encore implémentées. Cette documentation distingue les éléments présents dans le code de ceux qui restent à développer.
 
@@ -11,8 +11,8 @@ Le projet évolue encore : certaines parties sont des prototypes et toutes les f
 | Cœur natif C++23 | En développement |
 | Configuration et compilation CMake | Présentes |
 | Fenêtrage GLFW | Présent |
-| Backend OpenGL 3.1 | Prototype en développement |
-| Bindings Python avec nanobind | Optionnels, Free-Threaded préféré, GIL en repli |
+| Backend OpenGL ES 3.0 / EGL | Prototype en développement |
+| Bindings Python avec nanobind | Optionnels, ABI GIL (Python 3.12+) |
 | Démo native | Optionnelle, selon la présence de sa source |
 | Tests CTest | Profil de performances et file de tâches |
 
@@ -34,13 +34,12 @@ Pour le cœur natif :
 - CMake 3.21 ou plus récent ;
 - pkg-config ;
 - GLFW 3 ;
-- les bibliothèques de développement OpenGL ;
+- les bibliothèques de développement EGL et OpenGL ES 3 ;
 - les bibliothèques de threads du système.
 
 Pour les bindings Python :
 
-- Python 3.12 ou plus récent et ses fichiers de développement ;
-- si Python 3.13+ Free-Threaded est disponible avec CMake 3.30+, cette ABI est préférée ; sinon l'ABI Python classique avec GIL est utilisée ;
+- Python 3.12 ou plus récent et ses fichiers de développement (ABI classique avec GIL) ;
 - nanobind 3.1.0, récupéré à une version Git précise par CMake.
 
 ### Debian / Ubuntu
@@ -49,10 +48,10 @@ Pour le cœur natif :
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev
+sudo apt install -y build-essential cmake pkg-config libglfw3-dev libegl1-mesa-dev libgles2-mesa-dev
 ```
 
-Python 3.12+ doit être installé avec ses fichiers de développement. Python Free-Threaded 3.13+ est utilisé en priorité lorsqu'il est détecté par CMake 3.30+ ; sinon le build utilise l'ABI standard avec GIL.
+Python 3.12+ doit être installé avec ses fichiers de développement. La configuration ARM utilise l'ABI standard avec GIL.
 
 ## Compilation
 
@@ -67,7 +66,7 @@ cmake --build build --parallel
 
 ### Avec les bindings Python
 
-CMake sélectionne automatiquement Python Free-Threaded 3.13+ si disponible (CMake 3.30+), puis revient à Python standard avec GIL (Python 3.12+ minimum) :
+Avec Python 3.12+ et son module de développement :
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=ON -DBUILD_DEMO=ON
