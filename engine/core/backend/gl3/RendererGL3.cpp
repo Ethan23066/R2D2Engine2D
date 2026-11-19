@@ -2,7 +2,11 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#if defined(R2D2_USE_GLES)
+#include <GLES3/gl3.h>
+#else
 #include <glad/glad.h>
+#endif
 
 #include "GLContext.hpp"
 
@@ -35,11 +39,13 @@ int RendererGL3::init(void* win, int w, int h) {
     GLFWwindow* glfw_window = static_cast<GLFWwindow*>(win);
     glfwMakeContextCurrent(glfw_window);
 
+#if !defined(R2D2_USE_GLES)
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         std::cerr << "Failed to load OpenGL via GLAD\n";
         glfwMakeContextCurrent(nullptr);
         return 0;
     }
+#endif
 
     const auto current_thread = std::this_thread::get_id();
     if (!r2d2::gl3_detail::activate_context(current_thread, win)) {
