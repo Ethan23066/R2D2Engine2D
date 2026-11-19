@@ -14,7 +14,7 @@ include(GNUInstallDirs)
 include(CTest)
 include(FetchContent)
 
-option(BUILD_PY_BINDINGS "Build Python bindings (nanobind, Python 3.14t)" ON)
+option(BUILD_PY_BINDINGS "Build Python bindings (Free-Threaded preferred, GIL fallback)" ON)
 option(BUILD_DEMO "Build demo executable when its source is available" ON)
 
 find_package(PkgConfig REQUIRED)
@@ -48,26 +48,36 @@ target_link_libraries(r2d2_core PUBLIC
     Threads::Threads
 )
 
-# Python Free-Threaded bindings.
-# FindPython gained explicit support for the fourth (gil_disabled) ABI flag in CMake 3.30.
+# Prefer the Free-Threaded CPython ABI whenever CMake can detect it.
+# CMake 3.30 added the fourth Python_FIND_ABI flag (gil_disabled).
 if(BUILD_PY_BINDINGS)
-    if(CMAKE_VERSION VERSION_LESS 3.30)
-        message(FATAL_ERROR
-            "BUILD_PY_BINDINGS requires CMake 3.30 or newer to select Python's "
-            "Free-Threaded ABI reliably. Use -DBUILD_PY_BINDINGS=OFF for a native-only build.")
+    set(R2D2_PYTHON_FREE_THREADED OFF)
+
+    if(NOT CMAKE_VERSION VERSION_LESS 3.30)
+        set(Python_FIND_STRATEGY LOCATION)
+        set(Python_FIND_ABI "OFF" "ANY" "ANY" "ON")
+        find_package(Python 3.8 QUIET COMPONENTS Interpreter Development.Module)
+
+        if(Python_FOUND)
+            set(R2D2_PYTHON_FREE_THREADED ON)
+            message(STATUS "Python Free-Threaded ABI selected: ${Python_EXECUTABLE} (${Python_VERSION})")
+        endif()
     endif()
 
-    set(Python_FIND_ABI "OFF" "ANY" "ANY" "ON")
-    set(Python_FIND_STRATEGY LOCATION)
-    find_package(Python 3.14 REQUIRED COMPONENTS Interpreter Development.Module)
-
-    if(NOT Python_VERSION VERSION_GREATER_EQUAL 3.14)
-        message(FATAL_ERROR "Python 3.14 or newer is required for the bindings.")
+    # Fallback to the regular GIL-enabled ABI when no compatible free-threaded
+    # interpreter/development module is installed (or CMake is too old to detect it).
+    if(NOT R2D2_PYTHON_FREE_THREADED)
+        unset(Python_EXECUTABLE CACHE)
+        unset(Python_INCLUDE_DIR CACHE)
+        unset(Python_LIBRARY CACHE)
+        unset(Python_SABI_LIBRARY CACHE)
+        set(Python_FIND_ABI "OFF" "ANY" "ANY" "OFF")
+        find_package(Python 3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+        message(STATUS "Python GIL-enabled ABI selected as fallback: ${Python_EXECUTABLE} (${Python_VERSION})")
     endif()
 
     message(STATUS "Python interpreter: ${Python_EXECUTABLE}")
     message(STATUS "Python version: ${Python_VERSION}")
-    message(STATUS "Python Free-Threaded ABI requested.")
 
     # Pin the dependency: never build against a moving master branch.
     FetchContent_Declare(
@@ -85,11 +95,18 @@ if(BUILD_PY_BINDINGS)
 
     FetchContent_MakeAvailable(nanobind)
 
-    nanobind_add_module(_r2d2
-        NB_SHARED
-        FREE_THREADED
-        bindings/bindings.cpp
-    )
+    if(R2D2_PYTHON_FREE_THREADED)
+        nanobind_add_module(_r2d2
+            NB_SHARED
+            FREE_THREADED
+            bindings/bindings.cpp
+        )
+    else()
+        nanobind_add_module(_r2d2
+            NB_SHARED
+            bindings/bindings.cpp
+        )
+    endif()
 
     target_link_libraries(_r2d2 PRIVATE r2d2_core)
     set_target_properties(_r2d2 PROPERTIES
