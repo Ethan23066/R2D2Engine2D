@@ -2,7 +2,11 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#if defined(R2D2_USE_GLES)
+#include <GLES3/gl3.h>
+#else
 #include <glad/glad.h>
+#endif
 
 #include "GLContext.hpp"
 
