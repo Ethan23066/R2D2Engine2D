@@ -81,6 +81,14 @@ std::unique_ptr<GlfwWindow> GlfwWindow::create(
         }
     }
 
+#if defined(R2D2_USE_GLES)
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#else
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+#endif
     glfwWindowHint(GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE);
     GLFWwindow* window = glfwCreateWindow(
         width, height, title ? title : "R2D2", monitor, nullptr);
