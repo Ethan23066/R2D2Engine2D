@@ -48,36 +48,23 @@ target_link_libraries(r2d2_core PUBLIC
     Threads::Threads
 )
 
-# Prefer the Free-Threaded CPython ABI whenever CMake can detect it.
-# CMake 3.30 added the fourth Python_FIND_ABI flag (gil_disabled).
+# Python bindings: detect any complete Python 3.12+ and query Py_GIL_DISABLED directly.
 if(BUILD_PY_BINDINGS)
-    set(R2D2_PYTHON_FREE_THREADED OFF)
+    set(Python_FIND_UNVERSIONED_NAMES FIRST)
+    find_package(Python 3.12 REQUIRED COMPONENTS Interpreter Development.Module)
 
-    if(NOT CMAKE_VERSION VERSION_LESS 3.30)
-        set(Python_FIND_STRATEGY LOCATION)
-        set(Python_FIND_ABI "OFF" "ANY" "ANY" "ON")
-        find_package(Python 3.13 QUIET COMPONENTS Interpreter Development.Module)
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_config_var('Py_GIL_DISABLED') or 0)"
+        OUTPUT_VARIABLE R2D2_PY_GIL_DISABLED
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-        if(Python_FOUND)
-            set(R2D2_PYTHON_FREE_THREADED ON)
-            message(STATUS "Python Free-Threaded ABI selected: ${Python_EXECUTABLE} (${Python_VERSION})")
-        endif()
-    endif()
-
-    # Fallback to the regular GIL-enabled ABI when no compatible free-threaded
-    # interpreter/development module is installed (or CMake is too old to detect it).
-    if(NOT R2D2_PYTHON_FREE_THREADED)
-        unset(Python_EXECUTABLE CACHE)
-        unset(Python_INCLUDE_DIR CACHE)
-        unset(Python_LIBRARY CACHE)
-        unset(Python_SABI_LIBRARY CACHE)
-        if(NOT CMAKE_VERSION VERSION_LESS 3.30)
-            set(Python_FIND_ABI "OFF" "ANY" "ANY" "OFF")
-        else()
-            set(Python_FIND_ABI "OFF" "ANY" "ANY")
-        endif()
-        find_package(Python 3.12 REQUIRED COMPONENTS Interpreter Development.Module)
-        message(STATUS "Python GIL-enabled ABI selected as fallback: ${Python_EXECUTABLE} (${Python_VERSION})")
+    if(R2D2_PY_GIL_DISABLED STREQUAL "1")
+        set(R2D2_PYTHON_FREE_THREADED ON)
+        message(STATUS "Python Free-Threaded ABI enabled: ${Python_EXECUTABLE} (${Python_VERSION})")
+    else()
+        set(R2D2_PYTHON_FREE_THREADED OFF)
+        message(STATUS "Python GIL-enabled ABI selected: ${Python_EXECUTABLE} (${Python_VERSION})")
     endif()
 
     message(STATUS "Python interpreter: ${Python_EXECUTABLE}")
@@ -86,7 +73,7 @@ if(BUILD_PY_BINDINGS)
     # Pin the dependency: never build against a moving master branch.
     FetchContent_Declare(
         nanobind
-        GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+        GIT_REPOSITORY https://github.com/wjakob/nanobind
         GIT_TAG        v3.1.0
         GIT_SHALLOW    TRUE
         GIT_SUBMODULES ext/robin_map
