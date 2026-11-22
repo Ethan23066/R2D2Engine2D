@@ -136,3 +136,26 @@ void ShaderGL3::use() {
     if (owns_context() && compiled_ && program_)
         glUseProgram(program_);
 }
+void ShaderGL3::set_int(const char* name, int value) {
+    if (!name || !owns_context() || !compiled_ || !program_) return;
+    const GLint loc = glGetUniformLocation(program_, name);
+    if (loc != -1) glUniform1i(loc, value);
+}
+
+void ShaderGL3::set_float(const char* name, float value) {
+    if (!name || !owns_context() || !compiled_ || !program_) return;
+    const GLint loc = glGetUniformLocation(program_, name);
+    if (loc != -1) glUniform1f(loc, value);
+}
+
+void ShaderGL3::set_vec2(const char* name, float x, float y) {
+    if (!name || !owns_context() || !compiled_ || !program_) return;
+    const GLint loc = glGetUniformLocation(program_, name);
+    if (loc != -1) glUniform2f(loc, x, y);
+}
+
+void ShaderGL3::set_vec4(const char* name, float x, float y, float z, float w) {
+    if (!name || !owns_context() || !compiled_ || !program_) return;
+    const GLint loc = glGetUniformLocation(program_, name);
+    if (loc != -1) glUniform4f(loc, x, y, z, w);
+}

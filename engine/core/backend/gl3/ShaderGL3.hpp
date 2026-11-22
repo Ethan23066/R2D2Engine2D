@@ -1,4 +1,5 @@
 #pragma once
+
 #include <thread>
 
 struct ShaderGL3 {
@@ -9,6 +10,12 @@ struct ShaderGL3 {
 
     bool load(const char* vs_path, const char* fs_path);
     void use();
+
+    void set_int(const char* name, int value);
+    void set_float(const char* name, float value);
+    void set_vec2(const char* name, float x, float y);
+    void set_vec4(const char* name, float x, float y, float z, float w);
+
     void set_context_owner(std::thread::id owner) noexcept;
     bool owns_context() const noexcept;
 

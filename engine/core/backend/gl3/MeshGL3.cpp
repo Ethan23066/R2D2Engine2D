@@ -6,6 +6,7 @@
 
 #include "GLContext.hpp"
 
+#include <array>
 #include <thread>
 
 bool MeshGL3::owns_context() const noexcept {
@@ -50,9 +51,63 @@ void MeshGL3::upload() {
     uploaded_ = true;
 }
 
-void MeshGL3::draw() {
-    // No vertex-data upload API exists yet. Do not issue a draw call using
-    // uninitialized vertex attributes; this remains an allocation prototype.
+bool MeshGL3::upload_vertices(std::span<const float> vertices) {
+    // Format attendu : 5 floats par sommet -> (x, y, z, u, v)
+    if (vertices.empty() || vertices.size() % 5 != 0)
+        return false;
+
+    if (!uploaded_)
+        upload();
     if (!owns_context() || !uploaded_)
+        return false;
+
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        static_cast<GLsizeiptr>(vertices.size_bytes()),
+        vertices.data(),
+        GL_STATIC_DRAW
+    );
+
+    constexpr GLsizei stride = 5 * sizeof(float);
+    // Location 0 : position (x, y, z)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(0);
+    // Location 1 : coordonnées de texture (u, v)
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    vertex_count_ = static_cast<int>(vertices.size() / 5);
+    return true;
+}
+
+bool MeshGL3::upload_quad(float width, float height) {
+    const float hw = width * 0.5f;
+    const float hh = height * 0.5f;
+
+    // 2 triangles (6 sommets) avec position (x, y, z) + UV (u, v)
+    const std::array<float, 30> quad = {
+        -hw, -hh, 0.0f,  0.0f, 0.0f,
+         hw, -hh, 0.0f,  1.0f, 0.0f,
+         hw,  hh, 0.0f,  1.0f, 1.0f,
+
+        -hw, -hh, 0.0f,  0.0f, 0.0f,
+         hw,  hh, 0.0f,  1.0f, 1.0f,
+        -hw,  hh, 0.0f,  0.0f, 1.0f
+    };
+
+    return upload_vertices(quad);
+}
+
+void MeshGL3::draw() {
+    if (!owns_context() || !uploaded_ || vertex_count_ <= 0)
         return;
+
+    glBindVertexArray(vao_);
+    glDrawArrays(GL_TRIANGLES, 0, vertex_count_);
+    glBindVertexArray(0);
 }

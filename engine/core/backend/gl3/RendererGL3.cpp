@@ -78,6 +78,9 @@ void RendererGL3::begin_frame(float r, float g, float b, float a) {
         width = framebuffer_width;
         height = framebuffer_height;
         glViewport(0, 0, width, height);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     }
 
     glClearColor(r, g, b, a);
