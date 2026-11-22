@@ -9,6 +9,8 @@
 #include "engine/core/backend/gl3/MeshGL3.hpp"
 #include "engine/core/backend/gl3/Texture.hpp"
 
+#include <GLFW/glfw3.h>
+
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -52,7 +54,6 @@ struct PyWindow {
         owned_handle = nullptr;
     }
 
-
     void swap_buffers() {
         nb::gil_scoped_release release;
         engine_window_swap_buffers();
@@ -77,6 +78,13 @@ struct PyWindow {
         nb::gil_scoped_release release;
         return engine_window_get_native_handle();
     }
+
+    bool is_key_pressed(int key) const {
+        if (!owned_handle || engine_window_get_native_handle() != owned_handle)
+            return false;
+        nb::gil_scoped_release release;
+        return glfwGetKey(static_cast<GLFWwindow*>(owned_handle), key) == GLFW_PRESS;
+    }
 };
 
 NB_MODULE(_r2d2, m) {
@@ -90,7 +98,21 @@ NB_MODULE(_r2d2, m) {
         .def("poll_events", &PyWindow::poll_events)
         .def("should_close", &PyWindow::should_close)
         .def("run", &PyWindow::run)
-        .def("native_handle", &PyWindow::native_handle);
+        .def("native_handle", &PyWindow::native_handle)
+        .def("is_key_pressed", &PyWindow::is_key_pressed, nb::arg("key"));
+
+    m.attr("KEY_SPACE") = GLFW_KEY_SPACE;
+    m.attr("KEY_LEFT")  = GLFW_KEY_LEFT;
+    m.attr("KEY_RIGHT") = GLFW_KEY_RIGHT;
+    m.attr("KEY_UP")    = GLFW_KEY_UP;
+    m.attr("KEY_DOWN")  = GLFW_KEY_DOWN;
+    m.attr("KEY_A")     = GLFW_KEY_A;
+    m.attr("KEY_D")     = GLFW_KEY_D;
+    m.attr("KEY_Q")     = GLFW_KEY_Q;
+    m.attr("KEY_W")     = GLFW_KEY_W;
+    m.attr("KEY_S")     = GLFW_KEY_S;
+    m.attr("KEY_Z")     = GLFW_KEY_Z;
+    m.attr("KEY_ESC")   = GLFW_KEY_ESCAPE;
 
     m.def("init", []() { g_lifecycle.init(); });
     m.def("update", []() { g_lifecycle.update(); });
