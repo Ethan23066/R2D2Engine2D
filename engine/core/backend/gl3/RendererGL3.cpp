@@ -1,15 +1,21 @@
 #include "RendererGL3.hpp"
-
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-
+#include "engine/core/window/window.hpp"
 #include "GLContext.hpp"
-
 #include <iostream>
 #include <thread>
 
 RendererGL3::RendererGL3() = default;
+RendererGL3::~RendererGL3() {
+    shutdown();
+}
+
+bool RendererGL3::is_window_still_valid() const noexcept {
+    return window != nullptr && engine_window_get_native_handle() == window;
+}
+
 
 void RendererGL3::set_context_owner(std::thread::id owner) noexcept {
     owner_thread_ = owner;
@@ -57,7 +63,7 @@ int RendererGL3::init(void* win, int w, int h) {
 }
 
 void RendererGL3::begin_frame(float r, float g, float b, float a) {
-    if (!window || owner_thread_ != std::this_thread::get_id()
+    if (!is_window_still_valid() || owner_thread_ != std::this_thread::get_id()
         || !r2d2::gl3_detail::is_context_owner_thread())
         return;
 
@@ -88,7 +94,7 @@ void RendererGL3::begin_frame(float r, float g, float b, float a) {
 }
 
 void RendererGL3::end_frame() {
-    if (!window || owner_thread_ != std::this_thread::get_id()
+    if (!is_window_still_valid() || owner_thread_ != std::this_thread::get_id()
         || !r2d2::gl3_detail::is_context_owner_thread())
         return;
 
@@ -104,10 +110,14 @@ void RendererGL3::shutdown() {
     if (!window || owner_thread_ != std::this_thread::get_id())
         return;
 
-    auto* glfw_window = static_cast<GLFWwindow*>(window);
-    glfwMakeContextCurrent(glfw_window);
+    if (engine_window_get_native_handle() == window) {
+        auto* glfw_window = static_cast<GLFWwindow*>(window);
+        glfwMakeContextCurrent(glfw_window);
+        r2d2::gl3_detail::deactivate_context(owner_thread_, window);
+        glfwMakeContextCurrent(nullptr);
+} else {
     r2d2::gl3_detail::deactivate_context(owner_thread_, window);
-    glfwMakeContextCurrent(nullptr);
+}
 
     window = nullptr;
     width = 0;

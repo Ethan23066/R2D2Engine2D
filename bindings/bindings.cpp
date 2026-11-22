@@ -21,9 +21,13 @@ static r2d2::Lifecycle g_lifecycle;
 
 struct PyWindow {
     std::string py_title;
+    void* owned_handle = nullptr;
 
     PyWindow(int width, int height, const std::string& title = "R2D2",
              bool fullscreen = false, bool resizable = true) {
+        if (engine_window_get_native_handle() != nullptr)
+            throw std::runtime_error("A native window is already active");
+
         EngineWindowConfig cfg{};
         cfg.width = width;
         cfg.height = height;
@@ -32,15 +36,22 @@ struct PyWindow {
         cfg.fullscreen = fullscreen;
         cfg.resizable = resizable;
 
-        nb::gil_scoped_release release;
-        if (!engine_window_init(&cfg))
-            throw std::runtime_error("engine_window_init failed");
+        {
+            nb::gil_scoped_release release;
+            if (!engine_window_init(&cfg))
+                throw std::runtime_error("engine_window_init failed");
+        }
+        owned_handle = engine_window_get_native_handle();
     }
 
     ~PyWindow() {
         nb::gil_scoped_release release;
-        engine_window_shutdown();
+        if (owned_handle != nullptr && engine_window_get_native_handle() == owned_handle) {
+            engine_window_shutdown();
+        }
+        owned_handle = nullptr;
     }
+
 
     void swap_buffers() {
         nb::gil_scoped_release release;

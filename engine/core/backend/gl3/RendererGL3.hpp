@@ -4,7 +4,12 @@
 
 class RendererGL3 {
 public:
+    public:
     RendererGL3();
+    ~RendererGL3();
+
+    RendererGL3(const RendererGL3&) = delete;
+    RendererGL3& operator=(const RendererGL3&) = delete;
 
     int init(void* win, int w, int h);
     void begin_frame(float r, float g, float b, float a);
@@ -17,6 +22,7 @@ public:
 
 private:
     // OpenGL calls and context transitions are confined to this thread.
+    bool is_window_still_valid() const noexcept;
     void* window = nullptr;
     int width = 0;
     int height = 0;
