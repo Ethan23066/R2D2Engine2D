@@ -10,6 +10,8 @@
 #include "GLContext.hpp"
 
 #include <iostream>
+#include <limits>
+#include <mutex>
 #include <thread>
 
 bool Texture::owns_context() const noexcept {
@@ -66,12 +68,20 @@ bool Texture::load(const char* path, bool pixelated) {
     if (!path || !*path)
         return false;
 
-    stbi_set_flip_vertically_on_load(1);
-
     int w = 0;
     int h = 0;
     int channels = 0;
-    unsigned char* data = stbi_load(path, &w, &h, &channels, 4);
+    unsigned char* data = nullptr;
+
+    // stb_image's flip setting is process-global in some versions. Serialize
+    // setting it and decoding so concurrent texture loads cannot race.
+    {
+        static std::mutex stbi_mutex;
+        std::lock_guard lock(stbi_mutex);
+        stbi_set_flip_vertically_on_load(1);
+        data = stbi_load(path, &w, &h, &channels, 4);
+    }
+
     if (!data) {
         std::cerr << "Texture load failed (" << path << "): "
                   << (stbi_failure_reason() ? stbi_failure_reason() : "unknown error") << '\n';
@@ -86,8 +96,16 @@ bool Texture::load(const char* path, bool pixelated) {
 bool Texture::load_from_memory(std::span<const std::uint8_t> rgba_pixels, int width, int height, bool pixelated) {
     if (width <= 0 || height <= 0)
         return false;
-    const std::size_t expected_bytes = static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4;
-    if (rgba_pixels.size() < expected_bytes)
+
+    constexpr std::size_t bytes_per_pixel = 4;
+    const auto max_size = std::numeric_limits<std::size_t>::max();
+    const auto w = static_cast<std::size_t>(width);
+    const auto h = static_cast<std::size_t>(height);
+    if (w > max_size / bytes_per_pixel || h > max_size / (w * bytes_per_pixel))
+        return false;
+
+    const std::size_t expected_bytes = w * h * bytes_per_pixel;
+    if (rgba_pixels.size() != expected_bytes)
         return false;
 
     return upload_rgba(rgba_pixels.data(), width, height, pixelated);
