@@ -81,7 +81,13 @@ std::unique_ptr<GlfwWindow> GlfwWindow::create(
         }
     }
 
+    // Do not inherit hints left behind by another GLFW user in this process.
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE);
+
     GLFWwindow* window = glfwCreateWindow(
         width, height, title ? title : "R2D2", monitor, nullptr);
     if (!window)
