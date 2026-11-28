@@ -1,64 +1,79 @@
 # R2D2Engine2D
 
-R2D2Engine2D est un moteur 2D en cours de développement. Cette branche prépare un cœur natif en C++23, un backend graphique OpenGL, le fenêtrage GLFW et une API Python optionnelle basée sur nanobind.
+R2D2Engine2D est un moteur de jeu en cours de développement. Cette branche utilise un cœur natif en C++23, GLFW pour la création des fenêtres et la gestion des événements, ainsi qu'un backend graphique OpenGL 3.1. Une API Python optionnelle expose une partie du moteur via nanobind.
 
-Le projet évolue encore : certaines parties sont des prototypes et toutes les fonctionnalités annoncées dans l'architecture ne sont pas encore implémentées. Cette documentation distingue les éléments présents dans le code de ceux qui restent à développer.
+Le projet n'est pas encore une version stable ni un moteur complet. Ce README décrit les fonctionnalités présentes dans cette branche et distingue les composants utilisables des parties encore limitées.
 
 ## État du projet
 
-| Partie | État |
+| Composant | État actuel |
 |---|---|
 | Cœur natif C++23 | En développement |
-| Configuration et compilation CMake | Présentes |
-| Fenêtrage GLFW | Présent |
-| Backend OpenGL 3.1 | Prototype en développement |
-| Bindings Python avec nanobind | Optionnels, Free-Threaded préféré, GIL en repli |
-| Démo native | Optionnelle, selon la présence de sa source |
-| Tests CTest | Profil de performances et file de tâches |
+| Configuration et compilation CMake | En place |
+| Fenêtres et événements GLFW | Implémentés |
+| Backend OpenGL 3.1 | Premières fonctions opérationnelles, API encore en développement |
+| Shaders | Compilation, linkage et uniformes implémentés |
+| Textures | Chargement d'images et upload RGBA implémentés avec stb_image |
+| Meshes | Upload de sommets et dessin de triangles implémentés |
+| Bindings Python | Optionnels, via nanobind |
+| Démo native | Présente |
+| Tests CTest | Profil de frame, file de tâches et sélection du moniteur |
 
 ## Organisation du dépôt
 
-- `engine/core/` : code du moteur natif.
-- `engine/core/backend/gl3/` : backend graphique OpenGL.
-- `engine/core/window/` : gestion des fenêtres GLFW.
-- `bindings/` : bindings Python.
-- `examples/` : exemples et démo native.
+- `CMakeLists.txt` : configuration du projet et de ses cibles.
+- `engine/core/base/` : cycle de vie, configuration, événements, journalisation, système et temps.
+- `engine/core/backend/gl3/` : renderer OpenGL, shaders, textures, meshes, gestion du contexte et GLAD.
+- `engine/core/window/` : fenêtre GLFW et gestion de son cycle de vie.
+- `engine/core/threads/` : file de tâches thread-safe.
+- `engine/core/performance/` : outils de mesure du temps de frame.
+- `bindings/` : module Python nanobind `_r2d2`.
+- `examples/demo/` : démonstration native.
 - `tests/` : tests du projet.
 
 ## Prérequis
 
-Pour le cœur natif :
+### Cœur natif
 
-- un compilateur C prenant en charge C23 ;
-- un compilateur C++ prenant en charge C++23 ;
-- CMake 3.21 ou plus récent ;
-- pkg-config ;
-- GLFW 3 ;
-- les bibliothèques de développement OpenGL ;
-- les bibliothèques de threads du système.
+- Un compilateur C prenant en charge C23.
+- Un compilateur C++ prenant en charge C++23.
+- CMake 3.21 ou plus récent.
+- pkg-config.
+- GLFW 3 et ses fichiers de développement.
+- Les bibliothèques de développement OpenGL.
+- Les bibliothèques de threads du système.
+- Git et un accès réseau lors de la configuration CMake, pour récupérer les dépendances FetchContent.
 
-Pour les bindings Python :
+CMake récupère automatiquement :
+- **stb** depuis son dépôt Git, pour le chargement des images ;
+- **nanobind v3.1.0**, uniquement lorsque les bindings Python sont activés.
 
-- Python 3.12 ou plus récent et ses fichiers de développement ;
-- si Python 3.13+ Free-Threaded est disponible avec CMake 3.30+, cette ABI est préférée ; sinon l'ABI Python classique avec GIL est utilisée ;
-- nanobind 3.1.0, récupéré à une version Git précise par CMake.
+### Bindings Python (facultatifs)
 
-### Debian / Ubuntu
+- Python 3.12 ou plus récent.
+- Les fichiers de développement correspondant à l'interpréteur Python utilisé.
+- nanobind, récupéré automatiquement par CMake.
+
+Le projet détecte si l'interpréteur Python sélectionné est Free-Threaded (`Py_GIL_DISABLED`). Dans ce cas, le module nanobind est construit avec le support Free-Threaded. Sinon, il est construit avec l'ABI Python classique et le GIL. Pour utiliser une installation Free-Threaded, il faut donc sélectionner cet interpréteur lors de la configuration CMake.
+
+## Installation des dépendances (Debian / Ubuntu)
 
 Pour le cœur natif :
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev
+sudo apt install -y build-essential cmake pkg-config libglfw3-dev libgl1-mesa-dev git
 ```
 
-Python 3.12+ doit être installé avec ses fichiers de développement. Python Free-Threaded 3.13+ est utilisé en priorité lorsqu'il est détecté par CMake 3.30+ ; sinon le build utilise l'ABI standard avec GIL.
+Pour les bindings Python, installe également les fichiers de développement correspondant à Python 3.12 ou plus récent. Le nom du paquet dépend de la version de Python fournie par ta distribution (par exemple `python3-dev` lorsque cette version convient).
 
 ## Compilation
 
-### Cœur natif et démo, sans bindings Python
+Les commandes suivantes sont à exécuter depuis la racine du dépôt.
 
-Cette configuration ne recherche pas Python et peut être utilisée sur les machines sans environnement Python de développement :
+### Cœur natif, sans Python
+
+Cette configuration ne recherche pas Python et construit le cœur natif ainsi que la démo :
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=OFF -DBUILD_DEMO=ON
@@ -67,91 +82,150 @@ cmake --build build --parallel
 
 ### Avec les bindings Python
 
-CMake sélectionne automatiquement Python Free-Threaded 3.13+ si disponible (CMake 3.30+), puis revient à Python standard avec GIL (Python 3.12+ minimum) :
-
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=ON -DBUILD_DEMO=ON
 cmake --build build --parallel
 ```
 
+Pour demander explicitement à CMake d'utiliser un interpréteur Free-Threaded, indique son chemin lors de la configuration (ainsi que ses fichiers de développement) :
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PY_BINDINGS=ON -DPython_EXECUTABLE=/chemin/vers/python3.13t
+cmake --build build --parallel
+```
+
+Adapte le chemin à l'installation présente sur ta machine. Si l'interpréteur sélectionné n'est pas Free-Threaded, CMake construit le module avec le GIL classique.
+
 ### Options CMake
 
 | Option | Valeur par défaut | Description |
 |---|---:|---|
-| `BUILD_PY_BINDINGS` | `ON` | Construit le module Python `_r2d2`. |
-| `BUILD_DEMO` | `ON` | Construit `r2d2_demo` si `examples/demo/main.cpp` existe. |
-| `BUILD_TESTING` | `ON` | Active les tests CTest. |
+| `BUILD_PY_BINDINGS` | `ON` | Construit le module Python natif `_r2d2`. |
+| `BUILD_DEMO` | `ON` | Construit `r2d2_demo` si `examples/demo/main.cpp` est présent. |
+| `BUILD_TESTING` | `ON` | Active la cible de test CTest `r2d2_performance_test`. |
+
+Le cœur natif `r2d2_core` est construit dans les deux configurations. Les dépendances FetchContent nécessitent un accès réseau lors de leur première récupération.
 
 ## Exécution
 
-Si la cible de démo a été construite :
+### Démo native
+
+Après une compilation avec `BUILD_DEMO=ON` :
 
 ```bash
 ./build/r2d2_demo
 ```
 
-Si les bindings Python ont été construits et que le module est dans le chemin d'import Python :
+La démo crée une fenêtre GLFW et utilise le renderer pour effacer l'écran et présenter les frames.
+
+### Module Python
+
+Après une compilation avec `BUILD_PY_BINDINGS=ON`, le module `_r2d2` doit être accessible depuis le chemin d'import de Python :
 
 ```python
 import _r2d2
 ```
 
+Le module est une extension native : il ne s'agit pas d'un package Python autonome installé automatiquement dans un environnement virtuel.
+
 ## Tests
 
-Les tests restent actifs en configuration Release : ils utilisent des vérifications explicites et non `assert()`, qui peut être désactivé par `NDEBUG`.
+Les tests sont activés par défaut avec CTest. Ils vérifient notamment :
+- le calcul des mesures de temps de frame et des valeurs recommandées ;
+- les opérations de base de `ThreadSafeQueue`, sa fermeture, sa réinitialisation et sa capacité maximale ;
+- un échange producteur / consommateur entre threads ;
+- la sélection d'un mode de moniteur.
+
+Les vérifications utilisent une macro `CHECK` explicite plutôt que `assert()`, afin de rester actives en configuration Release.
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-## API Python actuellement déclarée
+## API Python actuellement exposée
 
-Le module `_r2d2` est défini dans `bindings/bindings.cpp). Il expose actuellement :
+Les bindings sont définis dans `bindings/bindings.cpp`. Les interfaces exposées dans cette branche sont :
 
-- `Window(width, height, title="R2D2", fullscreen=False, resizable=True)`
-  - `swap_buffers()`
-  - `poll_events()`
-  - `should_close()`
-  - `run()`
-  - `native_handle()`
-- Fonctions de cycle de vie :
-  - `init()`
-  - `update()`
-  - `shutdown()`
-  - `is_running()`
+### Fenêtre
+
+```python
+window = _r2d2.Window(width, height, title="R2D2", fullscreen=False, resizable=True)
+```
+
+Méthodes :
+- `swap_buffers()`
+- `poll_events()`
+- `should_close()`
+- `run()`
+- `native_handle()`
+- `is_key_pressed(key)`
+
+Quelques constantes de touches sont également exposées, notamment `KEY_SPACE`, `KEY_LEFT`, `KEY_RIGHT`, `KEY_UP`, `KEY_DOWN`, `KEY_A`, `KEY_D`, `KEY_Q`, `KEY_W`, `KEY_S`, `KEY_Z` et `KEY_ESC`.
+
+### Cycle de vie
+
+- `init()`
+- `update()`
+- `shutdown()`
+- `is_running()`
+
+À ce stade, `update()` est encore un point d'extension : les mises à jour du monde, de l'ECS et de la physique sont indiquées comme travaux futurs dans le code.
+
+### Renderer OpenGL
+
 - `RendererGL3()`
-  - `init(width, height)`
-  - `begin_frame(r, g, b, a)`
-  - `end_frame()`
-  - `shutdown()`
+- `init(width, height)`
+- `begin_frame(r, g, b, a)`
+- `end_frame()`
+- `shutdown()`
+
+Le renderer utilise la fenêtre native déjà créée sur le thread courant.
+
+### Shaders
+
 - `ShaderGL3()`
-  - `load(vs_path, fs_path)`
-  - `use()`
+- `load(vs_path, fs_path)`
+- `use()`
+- `set_int(name, value)`
+- `set_float(name, value)`
+- `set_vec2(name, x, y)`
+- `set_vec4(name, x, y, z, w)`
+
+### Textures
+
 - `Texture()`
-  - `load(path)`
-  - `bind(unit)`
+- `load(path, pixelated=True)`
+- `load_from_memory(pixels, width, height, pixelated=True)`
+- `bind(unit=0)`
+- Propriétés en lecture seule : `width`, `height`, `is_loaded`
+
+Le chargement depuis un fichier utilise stb_image. Les données envoyées à `load_from_memory` doivent être des pixels RGBA.
+
+### Meshes
+
 - `MeshGL3()`
-  - `upload()`
-  - `draw()`
+- `upload()`
+- `upload_vertices(vertices)`
+- `upload_quad(width=1.0, height=1.0)`
+- `draw()`
+- Propriété en lecture seule : `vertex_count`
 
-Cette liste décrit les interfaces déclarées, pas une garantie que chaque fonctionnalité soit déjà complète.
+Chaque sommet transmis à `upload_vertices` est représenté par cinq valeurs flottantes : position `(x, y, z)`, puis coordonnées de texture `(u, v)`.
 
-## État des fonctionnalités graphiques
+Cette liste décrit les interfaces effectivement liées par nanobind ; elle ne signifie pas que le moteur dispose déjà de toutes les fonctions attendues d'un moteur de jeu complet.
 
-Le backend OpenGL est en cours de construction :
+## Fenêtres, threads et contexte OpenGL
 
-- Le renderer initialise le contexte et gère le début et la fin d'une frame.
-- Les objets shader vérifient la compilation et le linkage des programmes.
-- Le mesh actuel alloue un VAO et un VBO, mais ne dispose pas encore d'API pour envoyer des sommets ; son appel `draw()` ne dessine donc rien.
-- Le chargement des textures n'est pas encore implémenté. En l'absence de décodeur d'image, `Texture.load()` retourne `False`.
+GLFW impose que les opérations sur une fenêtre soient effectuées par le thread qui l'a créée. Le moteur conserve cette règle :
+- la création et la destruction de la fenêtre restent liées à son thread propriétaire ;
+- `poll_events()`, `swap_buffers()` et la boucle `run()` sont destinés à être utilisés depuis ce thread ;
+- une demande de fermeture provenant d'un autre thread est signalée au thread propriétaire, qui effectue la destruction lors du traitement suivant des événements.
 
-Les ressources OpenGL doivent être détruites avant l'arrêt du renderer et pendant que le contexte propriétaire est encore courant. Les opérations GLFW de fenêtre et d'événements restent confinées au thread qui a créé la fenêtre. Une demande de fermeture provenant d'un autre thread est différée jusqu'au prochain passage du thread propriétaire dans la boucle d'événements.
+Le contexte OpenGL est lui aussi associé à un thread propriétaire. Les appels de rendu, le chargement des shaders, l'upload des textures et des meshes ainsi que la destruction des ressources OpenGL doivent être effectués avec le contexte approprié courant sur ce thread.
 
-## Threads et contexte OpenGL
+Il faut libérer les ressources OpenGL avant d'appeler `RendererGL3.shutdown()` et avant de détruire la fenêtre. La file `ThreadSafeQueue` fournit une synchronisation côté CPU ; elle ne rend pas les appels OpenGL sûrs depuis des workers.
 
-La file de tâches est un outil de synchronisation CPU ; elle ne rend pas les appels OpenGL sûrs depuis des workers. Un contexte OpenGL ne doit être utilisé que sur le thread qui le possède.
-
-Le projet ne fixe pas de nombre universel de threads pour les jeux. Le nombre de workers et leur répartition doivent rester proportionnés aux besoins et aux mesures, notamment sur les petites configurations.
+Le projet ne fixe pas de nombre universel de threads pour les jeux. Le nombre de workers doit dépendre des tâches réelles et des mesures effectuées sur les configurations visées.
 
 ## Forks et modifications personnelles
 
