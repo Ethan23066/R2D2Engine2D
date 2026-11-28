@@ -7,6 +7,7 @@
 #include "GLContext.hpp"
 
 #include <array>
+#include <limits>
 #include <thread>
 
 bool MeshGL3::owns_context() const noexcept {
@@ -52,8 +53,13 @@ void MeshGL3::upload() {
 }
 
 bool MeshGL3::upload_vertices(std::span<const float> vertices) {
-    // Format attendu : 5 floats par sommet -> (x, y, z, u, v)
+    // Five floats per vertex: position (x, y, z) and texture coordinates (u, v).
     if (vertices.empty() || vertices.size() % 5 != 0)
+        return false;
+
+    const std::size_t vertex_count = vertices.size() / 5;
+    if (vertex_count > static_cast<std::size_t>(std::numeric_limits<int>::max())
+        || vertices.size_bytes() > static_cast<std::size_t>(std::numeric_limits<GLsizeiptr>::max()))
         return false;
 
     if (!uploaded_)
@@ -71,25 +77,25 @@ bool MeshGL3::upload_vertices(std::span<const float> vertices) {
     );
 
     constexpr GLsizei stride = 5 * sizeof(float);
-    // Location 0 : position (x, y, z)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
-    // Location 1 : coordonnées de texture (u, v)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    vertex_count_ = static_cast<int>(vertices.size() / 5);
+    vertex_count_ = static_cast<int>(vertex_count);
     return true;
 }
 
 bool MeshGL3::upload_quad(float width, float height) {
+    if (!std::isfinite(width) || !std::isfinite(height) || width <= 0.0f || height <= 0.0f)
+        return false;
+
     const float hw = width * 0.5f;
     const float hh = height * 0.5f;
 
-    // 2 triangles (6 sommets) avec position (x, y, z) + UV (u, v)
     const std::array<float, 30> quad = {
         -hw, -hh, 0.0f,  0.0f, 0.0f,
          hw, -hh, 0.0f,  1.0f, 0.0f,
