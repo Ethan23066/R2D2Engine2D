@@ -7,6 +7,7 @@
 #include "GLContext.hpp"
 
 #include <array>
+#include <cmath>
 #include <limits>
 #include <thread>
 
