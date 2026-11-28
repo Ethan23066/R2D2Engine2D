@@ -1,13 +1,17 @@
 #include "RendererGL3.hpp"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+
 #include "engine/core/window/window.hpp"
 #include "GLContext.hpp"
+
 #include <iostream>
 #include <thread>
 
 RendererGL3::RendererGL3() = default;
+
 RendererGL3::~RendererGL3() {
     shutdown();
 }
@@ -15,7 +19,6 @@ RendererGL3::~RendererGL3() {
 bool RendererGL3::is_window_still_valid() const noexcept {
     return window != nullptr && engine_window_get_native_handle() == window;
 }
-
 
 void RendererGL3::set_context_owner(std::thread::id owner) noexcept {
     owner_thread_ = owner;
@@ -59,6 +62,8 @@ int RendererGL3::init(void* win, int w, int h) {
     height = h;
     owner_thread_ = current_thread;
     glViewport(0, 0, w, h);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     return 1;
 }
 
@@ -84,9 +89,6 @@ void RendererGL3::begin_frame(float r, float g, float b, float a) {
         width = framebuffer_width;
         height = framebuffer_height;
         glViewport(0, 0, width, height);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     }
 
     glClearColor(r, g, b, a);
@@ -115,9 +117,9 @@ void RendererGL3::shutdown() {
         glfwMakeContextCurrent(glfw_window);
         r2d2::gl3_detail::deactivate_context(owner_thread_, window);
         glfwMakeContextCurrent(nullptr);
-} else {
-    r2d2::gl3_detail::deactivate_context(owner_thread_, window);
-}
+    } else {
+        r2d2::gl3_detail::deactivate_context(owner_thread_, window);
+    }
 
     window = nullptr;
     width = 0;
