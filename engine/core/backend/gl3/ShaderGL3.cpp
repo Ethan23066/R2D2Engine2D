@@ -49,7 +49,20 @@ bool compile_shader(GLuint shader, const std::string& source, const char* label)
     std::cerr << "Shader compile failed (" << label << "): " << log << '\n';
     return false;
 }
+
+template <typename UniformFn>
+void set_uniform(GLuint program, UniformFn&& update) {
+    GLint previous_program = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &previous_program);
+    if (static_cast<GLuint>(previous_program) != program)
+        glUseProgram(program);
+
+    update();
+
+    if (static_cast<GLuint>(previous_program) != program)
+        glUseProgram(static_cast<GLuint>(previous_program));
 }
+} // namespace
 
 bool ShaderGL3::owns_context() const noexcept {
     return owner_thread_ == std::this_thread::get_id()
@@ -136,26 +149,35 @@ void ShaderGL3::use() {
     if (owns_context() && compiled_ && program_)
         glUseProgram(program_);
 }
+
 void ShaderGL3::set_int(const char* name, int value) {
-    if (!name || !owns_context() || !compiled_ || !program_) return;
+    if (!name || !owns_context() || !compiled_ || !program_)
+        return;
     const GLint loc = glGetUniformLocation(program_, name);
-    if (loc != -1) glUniform1i(loc, value);
+    if (loc != -1)
+        set_uniform(program_, [loc, value] { glUniform1i(loc, value); });
 }
 
 void ShaderGL3::set_float(const char* name, float value) {
-    if (!name || !owns_context() || !compiled_ || !program_) return;
+    if (!name || !owns_context() || !compiled_ || !program_)
+        return;
     const GLint loc = glGetUniformLocation(program_, name);
-    if (loc != -1) glUniform1f(loc, value);
+    if (loc != -1)
+        set_uniform(program_, [loc, value] { glUniform1f(loc, value); });
 }
 
 void ShaderGL3::set_vec2(const char* name, float x, float y) {
-    if (!name || !owns_context() || !compiled_ || !program_) return;
+    if (!name || !owns_context() || !compiled_ || !program_)
+        return;
     const GLint loc = glGetUniformLocation(program_, name);
-    if (loc != -1) glUniform2f(loc, x, y);
+    if (loc != -1)
+        set_uniform(program_, [loc, x, y] { glUniform2f(loc, x, y); });
 }
 
 void ShaderGL3::set_vec4(const char* name, float x, float y, float z, float w) {
-    if (!name || !owns_context() || !compiled_ || !program_) return;
+    if (!name || !owns_context() || !compiled_ || !program_)
+        return;
     const GLint loc = glGetUniformLocation(program_, name);
-    if (loc != -1) glUniform4f(loc, x, y, z, w);
+    if (loc != -1)
+        set_uniform(program_, [loc, x, y, z, w] { glUniform4f(loc, x, y, z, w); });
 }
